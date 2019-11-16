@@ -1,4 +1,5 @@
 const express = require("express");
+const mysql = require("mysql");
 const app = express();
 app.set("view engine", "ejs");
 app.use(express.static("public")); //folder for images, css, js
@@ -14,7 +15,9 @@ app.get("/dbTest", function (req, res) {
     conn.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
-        let sql = "SELECT CURDATE()";
+        let sql = `SELECT *
+                    FROM user
+                    `;
 
         conn.query(sql, function (err, rows, fields) {
             if (err) throw err;
@@ -25,10 +28,10 @@ app.get("/dbTest", function (req, res) {
 
 function dbConnection() {
     let conn = mysql.createConnection({
-        host: "cst336db.space",
-        user: "cst336_dbUser",
-        password: "xxxx",
-        database: "cst336_db"
+        host: "mcldisu5ppkm29wf.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+        user: "f64zakn2g1k9h5q6",
+        password: "pilpwz1gmln8xckq",
+        database: "rfgh18tfdnisudwj"
     });//createConnection
     return conn;
 }
