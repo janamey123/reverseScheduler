@@ -11,34 +11,39 @@ app.get("/", function (req, res) {
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
-app.get("/signingUpRequest", function (req, res) {
+app.get("/signingUpRequest", async function (req, res) {
+    let user = await getUser(req.query);
+    res.render("signUp", {"u": user});
+});
+
+function getUser(query) {
     // connect to database here to check if user already exists
-    let userName = req.query.userName;
-    let firstName = req.query.firstName;
-    let lastName = req.query.lastName;
-    let password = req.query.s_password;
+    let userName = query.userName;
+    let firstName = query.firstName;
+    let lastName = query.lastName;
+    let password = query.s_password;
     let success = false;
 
     let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
 
-    conn.connect(function (err) {
-        if (err) throw err;
-        console.log("Connected!");
-        let sql = `SELECT *
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected!");
+            let sql = `SELECT *
                    FROM user u
                    WHERE u.firstName LIKE '%${firstName}%'
                    AND u.lastName LIKE '%${lastName}%'
                    AND u.userName LIKE '%${userName}%';
                     `;
 
-        conn.query(sql, function (err, rows, fields) {
-            if (err) throw err;
-            res.send(rows);
-        });
-    });//connect
-
-
-});
+            conn.query(sql, function (err, rows, fields) {
+                if (err) throw err;
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getUser
 
 app.get("/dbTest", function (req, res) {
     let conn = dbConnection();
