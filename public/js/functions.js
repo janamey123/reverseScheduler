@@ -7,8 +7,6 @@ $(document).ready(function () {
 
     $("#loginBtn").on("click", function () {
 
-        location.href = $("#productlist option:selected").val();
-
         $.ajax({
             method: "GET",
             url: "",
