@@ -8,6 +8,9 @@ app.use(express.static("public")); //folder for images, css, js
 app.get("/", function (req, res) {
     res.render("index");
 });
+app.get("/signUp", function (req, res) {
+    res.render("signUp");
+});
 
 app.get("/dbTest", function (req, res) {
     let conn = dbConnection();
