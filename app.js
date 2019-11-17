@@ -11,6 +11,34 @@ app.get("/", function (req, res) {
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
+app.get("/signingUpRequest", function (req, res) {
+    // connect to database here to check if user already exists
+    let userName = req.query.userName;
+    let firstName = req.query.firstName;
+    let lastName = req.query.lastName;
+    let password = req.query.s_password;
+    let success = false;
+
+    let conn = dbConnection();
+
+    conn.connect(function (err) {
+        if (err) throw err;
+        console.log("Connected!");
+        let sql = `SELECT *
+                   FROM user u
+                   WHERE u.firstName LIKE '%${firstName}%'
+                   AND u.lastName LIKE '%${lastName}%'
+                   AND u.userName LIKE '%${userName}%';
+                    `;
+
+        conn.query(sql, function (err, rows, fields) {
+            if (err) throw err;
+            res.send(rows);
+        });
+    });//connect
+
+
+});
 
 app.get("/dbTest", function (req, res) {
     let conn = dbConnection();
