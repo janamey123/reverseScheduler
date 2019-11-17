@@ -6,7 +6,7 @@ app.use(express.static("public")); //folder for images, css, js
 
 // routes
 app.get("/", function (req, res) {
-    res.send("it works!");
+    res.render("index");
 });
 
 app.get("/dbTest", function (req, res) {
