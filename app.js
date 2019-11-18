@@ -13,17 +13,21 @@ app.get("/signUp", function (req, res) {
 });
 app.get("/signingUpRequest", async function (req, res) {
     let user = await getUser(req.query);
-    res.send(user);
+    let success = false;
+    try {
+        if (user[0].userName == req.query.userName) {
+            res.send(success);
+        }
+    } catch (e) {
+        success = true;
+        res.send(success);
+    }
 
 });
 
 function getUser(query) {
     // connect to database here to check if user already exists
     let userName = query.userName;
-    let firstName = query.firstName;
-    let lastName = query.lastName;
-    let password = query.s_password;
-    let success = false;
 
     let conn = dbConnection();
     return new Promise(function (resolve, reject) {
@@ -33,9 +37,7 @@ function getUser(query) {
             console.log("Connected!");
             let sql = `SELECT *
                    FROM user u
-                   WHERE u.firstName LIKE '%${firstName}%'
-                   AND u.lastName LIKE '%${lastName}%'
-                   AND u.userName LIKE '%${userName}%';
+                   WHERE u.userName LIKE '%${userName}%';
                     `;
 
             conn.query(sql, function (err, rows, fields) {
