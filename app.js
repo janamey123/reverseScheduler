@@ -16,6 +16,8 @@ app.get("/signingUpRequest", async function (req, res) {
     let success = false;
     try {
         if (user[0].userName == req.query.userName) {
+            // Method does not yet work
+            //insertNewUser(req.query);
             res.send(success);
         }
     } catch (e) {
@@ -47,6 +49,29 @@ function getUser(query) {
         });//connect
     });//promise
 }//getUser
+
+//Method does not yet work
+function insertNewUser(query) {
+    // connect to database here to check if user already exists
+    let userName = query.userName;
+    let firstName = query.firstName;
+    let lastName = query.lastName;
+    let password = query.s_password;
+
+    let conn = dbConnection();
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected!");
+            let sql = `INSERT INTO user (firstName, lastName, userName, password)
+                       VALUES ('%${firstName}%', '%${lastName}%', '%${userName}%', '%${password}%');
+                    `;
+
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log("1 record inserted");
+            });
+        });//connect
+}//insertNewUser
 
 app.get("/dbTest", function (req, res) {
     let conn = dbConnection();
