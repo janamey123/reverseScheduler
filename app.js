@@ -13,7 +13,8 @@ app.get("/signUp", function (req, res) {
 });
 app.get("/signingUpRequest", async function (req, res) {
     let user = await getUser(req.query);
-    res.render("signUp", {"u": user});
+    res.send(user);
+
 });
 
 function getUser(query) {

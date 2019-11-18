@@ -23,7 +23,14 @@ $(document).ready(function () {
                 "s_password": password
             },
             success: function (result, status) {
-                alert(result);
+                try{
+                    if (result[0].userName == userName){
+                        $("#signUpError").html("Username already taken. Please try again.");
+                    }
+                } catch (e) {
+                    $("#signUpError").html("Registration was successful.");
+                }
+
             }
 
         });//ajax
