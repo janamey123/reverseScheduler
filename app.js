@@ -16,11 +16,10 @@ app.get("/signingUpRequest", async function (req, res) {
     let success = false;
     try {
         if (user[0].userName == req.query.userName) {
-            // Method does not yet work
-            //insertNewUser(req.query);
             res.send(success);
         }
     } catch (e) {
+        let insert = await insertNewUser(req.query);
         success = true;
         res.send(success);
     }
@@ -50,7 +49,6 @@ function getUser(query) {
     });//promise
 }//getUser
 
-//Method does not yet work
 function insertNewUser(query) {
     // connect to database here to check if user already exists
     let userName = query.userName;
@@ -59,18 +57,26 @@ function insertNewUser(query) {
     let password = query.s_password;
 
     let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+
         conn.connect(function (err) {
             if (err) throw err;
             console.log("Connected!");
             let sql = `INSERT INTO user (firstName, lastName, userName, password)
                        VALUES ('%${firstName}%', '%${lastName}%', '%${userName}%', '%${password}%');
                     `;
+            console.log("SQL!");
 
-            con.query(sql, function (err, result) {
+            conn.query(sql, function (err, result) {
+                console.log("In conn.query!");
+                console.log(result);
                 if (err) throw err;
                 console.log("1 record inserted");
+                resolve(result);
             });
         });//connect
+    });//promise
+
 }//insertNewUser
 
 app.get("/dbTest", function (req, res) {
