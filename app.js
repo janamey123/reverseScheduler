@@ -11,11 +11,22 @@ app.get("/", function (req, res) {
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
+app.get("/schedule", function (req, res) {
+    res.render("schedule");
+});
+
+app.get("/loginRequest", async function (req, res) {
+    let user = await getUser(req.query);
+    let success = false;
+    console.log('loginRequest');
+    res.send(true);
+});
+
 app.get("/signingUpRequest", async function (req, res) {
     let user = await getUser(req.query);
     let success = false;
     try {
-        if (user[0].userName == req.query.userName) {
+        if (user[0].username == req.query.username) {
             res.send(success);
         }
     } catch (e) {
@@ -23,12 +34,12 @@ app.get("/signingUpRequest", async function (req, res) {
         success = true;
         res.send(success);
     }
-
 });
 
+// functions
 function getUser(query) {
     // connect to database here to check if user already exists
-    let userName = query.userName;
+    let username = query.username;
 
     let conn = dbConnection();
     return new Promise(function (resolve, reject) {
@@ -38,7 +49,7 @@ function getUser(query) {
             console.log("Connected!");
             let sql = `SELECT *
                    FROM user u
-                   WHERE u.userName LIKE '${userName}';
+                   WHERE u.username LIKE '${username}';
                     `;
 
             conn.query(sql, function (err, rows, fields) {
@@ -51,7 +62,7 @@ function getUser(query) {
 
 function insertNewUser(query) {
     // connect to database here to check if user already exists
-    let userName = query.userName;
+    let username = query.username;
     let firstName = query.firstName;
     let lastName = query.lastName;
     let password = query.s_password;
@@ -62,8 +73,8 @@ function insertNewUser(query) {
         conn.connect(function (err) {
             if (err) throw err;
             console.log("Connected!");
-            let sql = `INSERT INTO user (firstName, lastName, userName, password)
-                       VALUES ('${firstName}', '${lastName}', '${userName}', '${password}');
+            let sql = `INSERT INTO user (firstName, lastName, username, password)
+                       VALUES ('${firstName}', '${lastName}', '${username}', '${password}');
                     `;
             console.log("SQL!");
 
