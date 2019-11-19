@@ -69,16 +69,12 @@ function insertNewUser(query) {
 
     let conn = dbConnection();
     return new Promise(function (resolve, reject) {
-
         conn.connect(function (err) {
             if (err) throw err;
             console.log("Connected!");
-            let sql = `INSERT INTO user (firstName, lastName, username, password)
-                       VALUES ('${firstName}', '${lastName}', '${username}', '${password}');
-                    `;
-            console.log("SQL!");
+            let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
-            conn.query(sql, function (err, result) {
+            conn.query(sql, [firstName, lastName, username, password], function (err, result) {
                 console.log("In conn.query!");
                 console.log(result);
                 if (err) throw err;
