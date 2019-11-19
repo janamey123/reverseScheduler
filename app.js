@@ -38,7 +38,7 @@ function getUser(query) {
             console.log("Connected!");
             let sql = `SELECT *
                    FROM user u
-                   WHERE u.userName LIKE '%${userName}%';
+                   WHERE u.userName LIKE '${userName}';
                     `;
 
             conn.query(sql, function (err, rows, fields) {
@@ -63,7 +63,7 @@ function insertNewUser(query) {
             if (err) throw err;
             console.log("Connected!");
             let sql = `INSERT INTO user (firstName, lastName, userName, password)
-                       VALUES ('%${firstName}%', '%${lastName}%', '%${userName}%', '%${password}%');
+                       VALUES ('${firstName}', '${lastName}', '${userName}', '${password}');
                     `;
             console.log("SQL!");
 
