@@ -3,16 +3,36 @@ const mysql = require("mysql");
 const app = express();
 app.set("view engine", "ejs");
 app.use(express.static("public")); //folder for images, css, js
+//app.use('/', loginRouter );
 
 // routes
 app.get("/", function (req, res) {
     res.render("index");
 });
+app.get("/account", function (req, res) {
+    res.render("account");
+});
+app.get("/appointment", function (req, res) {
+    res.render("appointment");
+});
+app.get("/groups", function (req, res) {
+    res.render("groups");
+});
+app.post("/", function (req, res) {
+    // TODO: do something to login
+
+    //Return success or failure
+    res.json({
+
+    });
+});
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
-app.get("/schedule", function (req, res) {
-    res.render("schedule");
+app.get("/dashboard", function (req, res) {
+    res.render("dashboard", {
+        title: 'Logged in Dashboard'
+    });
 });
 
 app.get("/loginRequest", async function (req, res) {
