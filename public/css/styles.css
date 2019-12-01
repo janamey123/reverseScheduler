@@ -28,7 +28,7 @@
 
 /* To highlight the page you are on */
 #dashboard, #account, #appointment, #groups {
-    background-color: lightblue;
+    background-color: lightyellow;
     color: dimgray;
 }
 
@@ -40,7 +40,7 @@
     z-index: 99; /* Make sure it does not overlap */
     border: none; /* Remove borders */
     outline: none; /* Remove outline */
-    background-color: dimgray; /* Set a background color */
+    background-color: lightgrey; /* Set a background color */
     color: white; /* Text color */
     cursor: pointer; /* Add a mouse pointer on hover */
     /* Some padding */
