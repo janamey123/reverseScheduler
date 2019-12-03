@@ -8,4 +8,33 @@ Password: <input type="text" id="password" name="password">
 <button id="signUpBtn" class="btn btn-lg btn-info"> Sign up here!</button>
 <br><br>
 <div id="loginError"></div>
+
+<script>
+    // change from login page to sign up page
+    $("#signUpBtn").on("click", function () {
+        location.href = "/signUp";
+    });//signUpBtn
+
+    $("#loginBtn").on("click", function () {
+        let username = $("#username").val();
+        let password = $("#password").val();
+        $.ajax({
+            method: "GET",
+            url: "/loginRequest",
+            dataType: "json",
+            data: {
+                "username": username,
+                "password": password
+            },
+            success: function (result, status) {
+                alert(result);
+                if (result == false) {
+                    $("#loginError").html("Username or password wrong! Try again.");
+                } else {
+                    location.href = "/dashboard";
+                }
+            }
+        });//ajax
+    });//signUpBtn
+</script>
 <% include partials/footer %>
