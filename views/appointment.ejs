@@ -1,18 +1,62 @@
-<% include partials/header.ejs %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Appointment</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-<div class="topnav">
-    <a href="/dashboard">Your personal schedule</a>
-    <a href="/account">Your account</a>
-    <a id="appointment" href="/appointment">Add appointment</a>
-    <a href="/groups">My groups</a>
-</div>
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
-<br><br>
+    <!--ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body class="text-center">
+<br>
+<h4>Add new appointment!</h4>
+<br>
 
-new appointment
+Date: <input type="date" id="date" name="date"><br> <br>
+Start time: <input type="time" id="startTime" name="startTime"><br> <br>
+End time: <input type="time" id="endTime" name="endTime"><br> <br>
+Description: <input type="text" id="description" name="description">
 <br><br>
-<div>
-    <button onclick="topFunction()" id="myBtn" title="Go to top">&uarr;</button>
-</div>
+<button id="appointmentBtn" class="btn btn-lg btn-info">Add appointment!</button>
 <br><br>
-<% include partials/footer %>
+<div id="appointmentError"></div>
+<br>
+<script>
+    // user adds new appointment
+    $("#appointmentBtn").on("click", function () {
+        let date = $("#date").val();
+        let startTime = $("#startTime").val();
+        let endTime = $("#endTime").val();
+        let description = $("#description").val();
+        //TODO get actual username after Login works
+        let username = "Jana";
+
+        $.ajax({
+            method: "GET",
+            url: "/addAppointmentRequest",
+            dataType: "json",
+            data: {
+                "date": date,
+                "startTime": startTime,
+                "endTime": endTime,
+                "description": description,
+                "username": username
+            },
+            success: function (result, status) {
+                if (result == false) {
+                    $("#appointmentError").html("Sorry, your appointment was not added to your schedule.");
+                } else {
+                    $("#appointmentError").html("Appointment was added to your schedule successfully.");
+                }
+            }
+
+        });//ajax
+    });//signUpBtn
+</script>
+</body>
+</html>

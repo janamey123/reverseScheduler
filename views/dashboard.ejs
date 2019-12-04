@@ -3,21 +3,30 @@
 <div class="topnav">
     <a id="dashboard" href="/dashboard">Your personal schedule</a>
     <a href="/account">Your account</a>
-    <a href="/appointment">Add appointment</a>
     <a href="/groups">My groups</a>
 </div>
-
 <br><br>
 <h4>My Scheduler</h4>
-<div id="calendar"></div>
-<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
+<iframe src="https://calendar.google.com/calendar/embed?src=csumb.edu_aapus3l7rlkd8ob3nh97hb530g%40group.calendar.google.com&ctz=America%2FLos_Angeles"
+        style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
 <br><br>
+
+<p><a href="/appointment"
+      onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Add new appointment!</a></p>
+
 <div>
     <button onclick="topFunction()" id="myBtn" title="Go to top">&uarr;</button>
 </div>
-<br><br>
-<iframe src="https://calendar.google.com/calendar/embed?src=csumb.edu_aapus3l7rlkd8ob3nh97hb530g%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
 <script>
+    var popupWindow = null;
+
+    function centeredPopup(url, winName, w, h, scroll) {
+        LeftPosition = (screen.width) ? (screen.width - w) / 2 : 0;
+        TopPosition = (screen.height) ? (screen.height - h) / 2 : 0;
+        settings =
+            'height=' + h + ',width=' + w + ',top=' + TopPosition + ',left=' + LeftPosition + ',scrollbars=' + scroll + ',resizable'
+        popupWindow = window.open(url, winName, settings)
+    }
 
 </script>
 <% include partials/footer %>
