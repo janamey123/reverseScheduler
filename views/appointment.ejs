@@ -15,16 +15,17 @@
 <body class="text-center">
 <br>
 <h4>Add new appointment!</h4>
-<br><br>
+<br>
 
-Date: <input type="date" name="date"><br> <br>
-Start time: <input type="time" name="startTime"><br> <br>
-End time: <input type="time" name="endTime"><br> <br>
-Description: <textarea name="description" cols="50" height="20"></textarea>
+Date: <input type="date" id="date" name="date"><br> <br>
+Start time: <input type="time" id="startTime" name="startTime"><br> <br>
+End time: <input type="time" id="endTime" name="endTime"><br> <br>
+Description: <input type="text" id="description" name="description">
 <br><br>
 <button id="appointmentBtn" class="btn btn-lg btn-info">Add appointment!</button>
 <br><br>
 <div id="appointmentError"></div>
+<br>
 <script>
     // user adds new appointment
     $("#appointmentBtn").on("click", function () {

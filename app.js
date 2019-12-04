@@ -32,14 +32,16 @@ app.get("/appointment", function (req, res) {
 });
 
 app.get("/addAppointmentRequest", async function (req, res) {
+    console.log("Test");
     let scheduleId = await getScheduleId(req.query.username);
-    console.log("scheduleId: " + scheduleId);
+    let id = scheduleId[0].scheduleId;
+    console.log("scheduleId: " + id);
     let success = false;
 
-        if (scheduleId == 0) {
+        if (id == 0) {
             res.send(success);
         } else {
-            let insert = await insertAppointment(req.query, scheduleId);
+            let insert = await insertAppointment(req.query, id);
             success = true;
             res.send(success);
         }
@@ -128,11 +130,14 @@ function insertAppointment(body, scheduleId) {
     return new Promise(function (resolve, reject) {
         conn.connect(async function (err) {
             if (err) throw err;
-            console.log("Connected!");
+            console.log("Connected! Insert appointment");
 
             let sql = `INSERT INTO appointment
                         (scheduleId, description, date, startTime, endTime)
                          VALUES (?,?,?,?,?)`;
+
+            console.log("Description " + body.description);
+
 
             let params = [scheduleId, body.description, body.date, body.startTime, body.endTime];
 
@@ -151,15 +156,17 @@ function getScheduleId(username){
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
-            console.log("Connected!");
 
             let sql = `SELECT s.scheduleId
                               FROM user u JOIN schedule s ON u.userId = s.scheduleId
                               WHERE u.username LIKE '${username}';`;
 
-            conn.query(sql, params, function (err, rows, fields) {
+            console.log("Connected! after ScheduleId");
+
+            conn.query(sql, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
+                console.log("rows " + rows);
                 resolve(rows);
             });
         });//connect
