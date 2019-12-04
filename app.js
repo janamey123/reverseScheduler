@@ -15,9 +15,7 @@ app.post("/", function (req, res) {
     // TODO: do something to login
 
     //Return success or failure
-    res.json({
-
-    });
+    res.json({});
 });
 app.get("/dashboard", function (req, res) {
     res.render("dashboard", {
@@ -28,12 +26,29 @@ app.get("/dashboard", function (req, res) {
 app.get("/account", function (req, res) {
     res.render("account");
 });
+
 app.get("/appointment", function (req, res) {
     res.render("appointment");
 });
+
+app.get("/addAppointmentRequest", async function (req, res) {
+    let scheduleId = await getScheduleId(req.query.username);
+    console.log("scheduleId: " + scheduleId);
+    let success = false;
+
+        if (scheduleId == 0) {
+            res.send(success);
+        } else {
+            let insert = await insertAppointment(req.query, scheduleId);
+            success = true;
+            res.send(success);
+        }
+});
+
 app.get("/groups", function (req, res) {
     res.render("groups");
 });
+
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
@@ -66,7 +81,6 @@ function getUser(query) {
 
     let conn = dbConnection();
     return new Promise(function (resolve, reject) {
-
         conn.connect(function (err) {
             if (err) throw err;
             console.log("Connected!");
@@ -84,7 +98,6 @@ function getUser(query) {
 }//getUser
 
 function insertNewUser(query) {
-    // connect to database here to check if user already exists
     let username = query.username;
     let firstName = query.firstName;
     let lastName = query.lastName;
@@ -108,6 +121,50 @@ function insertNewUser(query) {
     });//promise
 
 }//insertNewUser
+
+function insertAppointment(body, scheduleId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+            console.log("Connected!");
+
+            let sql = `INSERT INTO appointment
+                        (scheduleId, description, date, startTime, endTime)
+                         VALUES (?,?,?,?,?)`;
+
+            let params = [scheduleId, body.description, body.date, body.startTime, body.endTime];
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//insertAppointment
+
+function getScheduleId(username){
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected!");
+
+            let sql = `SELECT s.scheduleId
+                              FROM user u JOIN schedule s ON u.userId = s.scheduleId
+                              WHERE u.username LIKE '${username}';`;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}
 
 app.get("/dbTest", function (req, res) {
     let conn = dbConnection();
