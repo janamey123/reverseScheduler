@@ -32,10 +32,8 @@ app.get("/addAppointment", function (req, res) {
 });
 
 app.get("/addAppointmentRequest", async function (req, res) {
-    console.log("Test");
     let scheduleId = await getScheduleId(req.query.username);
     let id = scheduleId[0].scheduleId;
-    console.log("scheduleId: " + id);
     let success = false;
 
         if (id == 0) {
@@ -45,6 +43,24 @@ app.get("/addAppointmentRequest", async function (req, res) {
             success = true;
             res.send(success);
         }
+});
+
+app.get("/deleteAppointment", function (req, res) {
+    res.render("deleteAppointment");
+});
+
+app.get("/deleteAppointmentRequest", async function (req, res) {
+    let scheduleId = await getScheduleId(req.query.username);
+    let id = scheduleId[0].scheduleId;
+    let success = false;
+
+    if (id == 0) {
+        res.send(success);
+    } else {
+        let del = await deleteAppointment(req.query, id);
+        success = true;
+        res.send(success);
+    }
 });
 
 app.get("/groups", function (req, res) {
@@ -132,6 +148,29 @@ function insertAppointment(body, scheduleId) {
         conn.connect(async function (err) {
             if (err) throw err;
             console.log("Connected! Insert appointment");
+
+            let sql = `INSERT INTO appointment
+                        (scheduleId, description, date, startTime, endTime)
+                         VALUES (?,?,?,?,?)`;
+
+            let params = [scheduleId, body.description, body.date, body.startTime, body.endTime];
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//insertAppointment
+
+function deleteAppointment(body, scheduleId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+            console.log("Connected! Delete appointment");
 
             let sql = `INSERT INTO appointment
                         (scheduleId, description, date, startTime, endTime)
