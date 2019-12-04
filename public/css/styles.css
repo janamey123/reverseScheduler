@@ -27,7 +27,7 @@
 }
 
 /* To highlight the page you are on */
-#dashboard, #account, #appointment, #groups {
+#dashboard, #account, #groups {
     background-color: lightyellow;
     color: dimgray;
 }

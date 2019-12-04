@@ -22,13 +22,13 @@ Start time: <input type="time" id="startTime" name="startTime"><br> <br>
 End time: <input type="time" id="endTime" name="endTime"><br> <br>
 Description: <input type="text" id="description" name="description">
 <br><br>
-<button id="appointmentBtn" class="btn btn-lg btn-info">Add appointment!</button>
+<button id="addAppointmentBtn" class="btn btn-lg btn-info">Add appointment!</button>
 <br><br>
-<div id="appointmentError"></div>
+<div id="addAppointmentError"></div>
 <br>
 <script>
     // user adds new appointment
-    $("#appointmentBtn").on("click", function () {
+    $("#addAppointmentBtn").on("click", function () {
         let date = $("#date").val();
         let startTime = $("#startTime").val();
         let endTime = $("#endTime").val();
@@ -49,9 +49,9 @@ Description: <input type="text" id="description" name="description">
             },
             success: function (result, status) {
                 if (result == false) {
-                    $("#appointmentError").html("Sorry, your appointment was not added to your schedule.");
+                    $("#addAppointmentError").html("Sorry, your appointment was not added to your schedule.");
                 } else {
-                    $("#appointmentError").html("Appointment was added to your schedule successfully.");
+                    $("#addAppointmentError").html("Appointment was added to your schedule successfully.");
                 }
             }
 

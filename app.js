@@ -27,8 +27,8 @@ app.get("/account", function (req, res) {
     res.render("account");
 });
 
-app.get("/appointment", function (req, res) {
-    res.render("appointment");
+app.get("/addAppointment", function (req, res) {
+    res.render("addAppointment");
 });
 
 app.get("/addAppointmentRequest", async function (req, res) {
