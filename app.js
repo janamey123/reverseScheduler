@@ -85,7 +85,8 @@ function getUser(query) {
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
-            console.log("Connected!");
+            console.log("Connected! Get user");
+
             let sql = `SELECT *
                    FROM user u
                    WHERE u.username LIKE '${username}';
@@ -109,7 +110,7 @@ function insertNewUser(query) {
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
-            console.log("Connected!");
+            console.log("Connected! Insert user");
             let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
             conn.query(sql, [firstName, lastName, username, password], function (err, result) {
@@ -136,9 +137,6 @@ function insertAppointment(body, scheduleId) {
                         (scheduleId, description, date, startTime, endTime)
                          VALUES (?,?,?,?,?)`;
 
-            console.log("Description " + body.description);
-
-
             let params = [scheduleId, body.description, body.date, body.startTime, body.endTime];
 
             conn.query(sql, params, function (err, rows, fields) {
@@ -160,8 +158,6 @@ function getScheduleId(username){
             let sql = `SELECT s.scheduleId
                               FROM user u JOIN schedule s ON u.userId = s.scheduleId
                               WHERE u.username LIKE '${username}';`;
-
-            console.log("Connected! after ScheduleId");
 
             conn.query(sql, function (err, rows, fields) {
                 if (err) throw err;
