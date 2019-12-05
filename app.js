@@ -54,12 +54,16 @@ app.get("/deleteAppointmentRequest", async function (req, res) {
     let id = scheduleId[0].scheduleId;
     let success = false;
 
-    if (id == 0) {
+    if (id == undefined) {
         res.send(success);
     } else {
         let del = await deleteAppointment(req.query, id);
-        success = true;
-        res.send(success);
+        if (del.affectedRows == 0) {
+            res.send(success);
+        } else {
+            success = true;
+            res.send(success);
+        }
     }
 });
 
@@ -130,10 +134,7 @@ function insertNewUser(query) {
             let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
             conn.query(sql, [firstName, lastName, username, password], function (err, result) {
-                console.log("In conn.query!");
-                console.log(result);
                 if (err) throw err;
-                console.log("1 record inserted");
                 resolve(result);
             });
         });//connect
@@ -172,13 +173,18 @@ function deleteAppointment(body, scheduleId) {
             if (err) throw err;
             console.log("Connected! Delete appointment");
 
-            let sql = `INSERT INTO appointment
-                        (scheduleId, description, date, startTime, endTime)
-                         VALUES (?,?,?,?,?)`;
+            let startTime = body.startTime + ":00";
+            let endTime = body.endTime + ":00";
 
-            let params = [scheduleId, body.description, body.date, body.startTime, body.endTime];
+            let sql = `DELETE
+                       FROM appointment
+                       WHERE scheduleId = ${scheduleId}
+                       AND description = '${body.description}' 
+                       AND date = '${body.date}' 
+                       AND startTime = '${startTime}' 
+                       AND endTime = '${endTime}';`;
 
-            conn.query(sql, params, function (err, rows, fields) {
+            conn.query(sql,function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
                 resolve(rows);
@@ -201,29 +207,11 @@ function getScheduleId(username){
             conn.query(sql, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
-                console.log("rows " + rows);
                 resolve(rows);
             });
         });//connect
     });//promise
 }
-
-app.get("/dbTest", function (req, res) {
-    let conn = dbConnection();
-
-    conn.connect(function (err) {
-        if (err) throw err;
-        console.log("Connected!");
-        let sql = `SELECT *
-                    FROM user
-                    `;
-
-        conn.query(sql, function (err, rows, fields) {
-            if (err) throw err;
-            res.send(rows);
-        });
-    });
-});//dbTest
 
 function dbConnection() {
     let conn = mysql.createConnection({
