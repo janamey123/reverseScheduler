@@ -95,6 +95,12 @@ app.get("/signingUpRequest", async function (req, res) {
     }
 });
 
+app.get("/userSearchSection", async function (req, res) {
+    let searchName = req.query.searchName;
+    let searchUsername = req.query.searchUsername;
+    let searchGroup = req.query.searchGroup;
+});
+
 // functions
 function getUser(query) {
     // connect to database here to check if user already exists

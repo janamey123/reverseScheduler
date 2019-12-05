@@ -16,7 +16,7 @@ First name: <input type="text" id="searchName" name="searchName">
 Username: <input type="text" id="searchUsername" name="searchUsername">
 <br><br>
 Group name:
-<select name="searchGroup">
+<select name="searchGroup" id="searchGroup">
     <option value=""> Select One</option>
     <% groups.forEach(function(i){ %>
         <option> <%= i.groupName %>  </option>
@@ -59,6 +59,31 @@ Sort by:
                 }
             }
         });//ajax
-    });//signUpBtn
+    });//loginUpBtn
+
+    $("#searchBtn").on("click", function () {
+        let searchUsername = $("#searchUsername").val();
+        let searchName = $("#searchName").val();
+        let searchGroup = $("#searchGroup").val();
+
+        $.ajax({
+            method: "GET",
+            url: "/userSearchSection",
+            dataType: "json",
+            data: {
+                "searchUsername": searchUsername,
+                "searchName": searchName,
+                "searchGroup": searchGroup
+            },
+            success: function (result, status) {
+                //alert(result);
+                if (result == false) {
+                    $("#loginError").html("Username or password wrong! Try again.");
+                } else {
+                    location.href = "/dashboard";
+                }
+            }
+        });//ajax
+    });//loginUpBtn
 </script>
 <% include partials/footer %>
