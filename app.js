@@ -6,10 +6,9 @@ app.use(express.static("public")); //folder for images, css, js
 //app.use('/', loginRouter );
 
 // routes
-app.get("/", function (req, res) {
-    res.render("index", {
-        title: 'login',
-    });
+app.get("/", async function (req, res) {
+    let groups = await getGroups();
+    res.render("index", {title: 'login', "groups": groups});
 });
 app.post("/", function (req, res) {
     // TODO: do something to login
@@ -36,13 +35,13 @@ app.get("/addAppointmentRequest", async function (req, res) {
     let id = scheduleId[0].scheduleId;
     let success = false;
 
-        if (id == 0) {
-            res.send(success);
-        } else {
-            let insert = await insertAppointment(req.query, id);
-            success = true;
-            res.send(success);
-        }
+    if (id == 0) {
+        res.send(success);
+    } else {
+        let insert = await insertAppointment(req.query, id);
+        success = true;
+        res.send(success);
+    }
 });
 
 app.get("/deleteAppointment", function (req, res) {
@@ -108,9 +107,9 @@ function getUser(query) {
             console.log("Connected! Get user");
 
             let sql = `SELECT *
-                   FROM user u
-                   WHERE u.username LIKE '${username}';
-                    `;
+                       FROM user u
+                       WHERE u.username LIKE '${username}';
+                       `;
 
             conn.query(sql, function (err, rows, fields) {
                 if (err) throw err;
@@ -151,8 +150,9 @@ function insertAppointment(body, scheduleId) {
             console.log("Connected! Insert appointment");
 
             let sql = `INSERT INTO appointment
-                        (scheduleId, description, date, startTime, endTime)
-                         VALUES (?,?,?,?,?)`;
+                       (scheduleId, description, date, startTime, endTime)
+                       VALUES (?,?,?,?,?)
+                       `;
 
             let params = [scheduleId, body.description, body.date, body.startTime, body.endTime];
 
@@ -182,9 +182,10 @@ function deleteAppointment(body, scheduleId) {
                        AND description = '${body.description}' 
                        AND date = '${body.date}' 
                        AND startTime = '${startTime}' 
-                       AND endTime = '${endTime}';`;
+                       AND endTime = '${endTime}';
+                       `;
 
-            conn.query(sql,function (err, rows, fields) {
+            conn.query(sql, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
                 resolve(rows);
@@ -193,7 +194,7 @@ function deleteAppointment(body, scheduleId) {
     });//promise
 }//insertAppointment
 
-function getScheduleId(username){
+function getScheduleId(username) {
     let conn = dbConnection();
 
     return new Promise(function (resolve, reject) {
@@ -201,8 +202,29 @@ function getScheduleId(username){
             if (err) throw err;
 
             let sql = `SELECT s.scheduleId
-                              FROM user u JOIN schedule s ON u.userId = s.scheduleId
-                              WHERE u.username LIKE '${username}';`;
+                       FROM user u JOIN schedule s ON u.userId = s.scheduleId
+                       WHERE u.username LIKE '${username}';
+                       `;
+
+            conn.query(sql, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}
+
+function getGroups() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT groupName 
+                       FROM rfgh18tfdnisudwj.group;
+                       `;
 
             conn.query(sql, function (err, rows, fields) {
                 if (err) throw err;

@@ -8,6 +8,30 @@ Password: <input type="text" id="password" name="password">
 <button id="signUpBtn" class="btn btn-lg btn-info"> Sign up here!</button>
 <br><br>
 <div id="loginError"></div>
+<br><br>
+<h3>User section:</h3>
+<br><br>
+First name: <input type="text" id="searchName" name="searchName">
+<br><br>
+Username: <input type="text" id="searchUsername" name="searchUsername">
+<br><br>
+Group name:
+<select name="searchGroup">
+    <option value=""> Select One</option>
+    <% groups.forEach(function(i){ %>
+        <option> <%= i.groupName %>  </option>
+    <% }); %>
+</select>
+<br><br>
+Sort by:
+<input type="radio" id="fn" name="sortBy" value="fn"> <label for="fn">First name</label>
+<input type="radio" id="un" name="sortBy" value="un"> <label for="un">Username</label>
+<input type="radio" id="gn" name="sortBy" value="gn"> <label for="gn">Group name</label>
+<br><br>
+<button id="searchBtn" class="btn btn-lg btn-info">Search</button>
+<br><br>
+<div id="searchError"></div>
+
 
 <script>
     // change from login page to sign up page
