@@ -99,6 +99,9 @@ app.get("/userSearchSection", async function (req, res) {
     let searchName = req.query.searchName;
     let searchUsername = req.query.searchUsername;
     let searchGroup = req.query.searchGroup;
+    let sortBy = req.query.sortBy;
+
+    let searchResult = await getSearchResult(req.query);
 });
 
 // functions
@@ -112,12 +115,14 @@ function getUser(query) {
             if (err) throw err;
             console.log("Connected! Get user");
 
+            let params = [username];
+
             let sql = `SELECT *
                        FROM user u
-                       WHERE u.username LIKE '${username}';
+                       WHERE u.username = ?;
                        `;
 
-            conn.query(sql, function (err, rows, fields) {
+            conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 resolve(rows);
             });
@@ -136,9 +141,11 @@ function insertNewUser(query) {
         conn.connect(function (err) {
             if (err) throw err;
             console.log("Connected! Insert user");
+
+            let params = [firstName, lastName, username, password];
             let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
-            conn.query(sql, [firstName, lastName, username, password], function (err, result) {
+            conn.query(sql, params, function (err, result) {
                 if (err) throw err;
                 resolve(result);
             });
@@ -182,16 +189,18 @@ function deleteAppointment(body, scheduleId) {
             let startTime = body.startTime + ":00";
             let endTime = body.endTime + ":00";
 
+            let params = [scheduleId, body.description, body.date, startTime, endTime];
+
             let sql = `DELETE
                        FROM appointment
-                       WHERE scheduleId = ${scheduleId}
-                       AND description = '${body.description}' 
-                       AND date = '${body.date}' 
-                       AND startTime = '${startTime}' 
-                       AND endTime = '${endTime}';
+                       WHERE scheduleId = ?
+                       AND description = ? 
+                       AND date = ?
+                       AND startTime = ?
+                       AND endTime = ?;
                        `;
 
-            conn.query(sql, function (err, rows, fields) {
+            conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
                 resolve(rows);
@@ -207,12 +216,13 @@ function getScheduleId(username) {
         conn.connect(function (err) {
             if (err) throw err;
 
+            let params = [username];
             let sql = `SELECT s.scheduleId
                        FROM user u JOIN schedule s ON u.userId = s.scheduleId
-                       WHERE u.username LIKE '${username}';
+                       WHERE u.username = ?;
                        `;
 
-            conn.query(sql, function (err, rows, fields) {
+            conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
                 resolve(rows);
@@ -235,6 +245,63 @@ function getGroups() {
             conn.query(sql, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}
+
+function getSearchResult(query) {
+    let searchName = query.searchName;
+    let searchUsername = query.searchUsername;
+    let searchGroup = query.searchGroup;
+    let sortBy = query.sortBy;
+
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [];
+            let sql = `SELECT u.firstName, u. username, g.groupName
+                       FROM user u, groupmember m, rfgh18tfdnisudwj.group g
+                       WHERE u.userId = m.userId
+                       AND m.groupId = g.groupId
+                       `;
+            console.log("SQL: " + sql);
+
+            if (searchName) {
+                sql += " AND u.firstName = ?";
+                console.log("SQL: " + sql);
+                params.push(searchName);
+
+            }
+            if (searchUsername) {
+                sql += " AND u.username = ?";
+                console.log("SQL: " + sql);
+                params.push(searchUsername);
+
+            }
+            if (searchGroup && searchGroup != "Select one") {
+                sql += " AND g.groupName = ?";
+                console.log("SQL: " + sql);
+                params.push(searchGroup);
+
+            }
+            if (sortBy) {
+                sql += " ORDER BY = ?";
+                console.log("SQL: " + sql);
+                params.push(sortBy);
+
+            }
+
+            sql += ";";
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                console.log("result: " + rows);
                 resolve(rows);
             });
         });//connect
