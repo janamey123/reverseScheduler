@@ -96,12 +96,8 @@ app.get("/signingUpRequest", async function (req, res) {
 });
 
 app.get("/userSearchSection", async function (req, res) {
-    let searchName = req.query.searchName;
-    let searchUsername = req.query.searchUsername;
-    let searchGroup = req.query.searchGroup;
-    let sortBy = req.query.sortBy;
-
     let searchResult = await getSearchResult(req.query);
+    res.send(searchResult);
 });
 
 // functions
@@ -269,31 +265,23 @@ function getSearchResult(query) {
                        WHERE u.userId = m.userId
                        AND m.groupId = g.groupId
                        `;
-            console.log("SQL: " + sql);
 
             if (searchName) {
                 sql += " AND u.firstName = ?";
-                console.log("SQL: " + sql);
                 params.push(searchName);
-
             }
             if (searchUsername) {
                 sql += " AND u.username = ?";
-                console.log("SQL: " + sql);
                 params.push(searchUsername);
-
             }
             if (searchGroup && searchGroup != "Select one") {
                 sql += " AND g.groupName = ?";
-                console.log("SQL: " + sql);
                 params.push(searchGroup);
-
             }
             if (sortBy) {
                 sql += " ORDER BY = ?";
                 console.log("SQL: " + sql);
                 params.push(sortBy);
-
             }
 
             sql += ";";
@@ -301,7 +289,6 @@ function getSearchResult(query) {
             conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
-                console.log("result: " + rows);
                 resolve(rows);
             });
         });//connect

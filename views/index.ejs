@@ -31,8 +31,10 @@ Sort by:
 <button id="searchBtn" class="btn btn-lg btn-info">Search</button>
 <br><br>
 <div id="searchError"></div>
-
-
+<br><br>
+<div id="h"></div>
+<div id="result"></div>
+<br><br>
 
 <script>
     // change from login page to sign up page
@@ -90,14 +92,19 @@ Sort by:
                 "sortBy": sortBy
             },
             success: function (result, status) {
-                //alert(result);
-                if (result == false) {
-                    $("#loginError").html("Username or password wrong! Try again.");
-                } else {
-                    location.href = "/dashboard";
+
+                for (let i = 0; i < result.length; i++) {
+                    $("#result").append(`<div name="result" id="${i}"></div>`);
+                }
+
+                $("#h").html("First name: Username: Group name:");
+
+                for (let i = 0; i < result.length; i++) {
+                    let key = "\#" + i;
+                    $(key).html(result[i].firstName + " " + result[i].username + " " + result[i].groupName);
                 }
             }
         });//ajax
-    });//loginUpBtn
+    });//searchBtn
 </script>
 <% include partials/footer %>
