@@ -6,10 +6,9 @@ app.use(express.static("public"));
 //app.use('/', loginRouter );
 
 // routes
-app.get("/", function (req, res) {
-    res.render("index", {
-        title: 'login',
-    });
+app.get("/", async function (req, res) {
+    let groups = await getGroups();
+    res.render("index", {title: 'login', "groups": groups});
 });
 app.post("/", function (req, res) {
     // TODO: do something to login
@@ -36,13 +35,13 @@ app.get("/addAppointmentRequest", async function (req, res) {
     let id = scheduleId[0].scheduleId;
     let success = false;
 
-        if (id == 0) {
-            res.send(success);
-        } else {
-            let insert = await insertAppointment(req.query, id);
-            success = true;
-            res.send(success);
-        }
+    if (id == 0) {
+        res.send(success);
+    } else {
+        let insert = await insertAppointment(req.query, id);
+        success = true;
+        res.send(success);
+    }
 });
 
 app.get("/deleteAppointment", function (req, res) {
@@ -96,6 +95,11 @@ app.get("/signingUpRequest", async function (req, res) {
     }
 });
 
+app.get("/userSearchSection", async function (req, res) {
+    let searchResult = await getSearchResult(req.query);
+    res.send(searchResult);
+});
+
 // functions
 function getUser(query) {
     // connect to database here to check if user already exists
@@ -107,12 +111,14 @@ function getUser(query) {
             if (err) throw err;
             console.log("Connected! Get user");
 
-            let sql = `SELECT *
-                   FROM user u
-                   WHERE u.username LIKE '${username}';
-                    `;
+            let params = [username];
 
-            conn.query(sql, function (err, rows, fields) {
+            let sql = `SELECT *
+                       FROM user u
+                       WHERE u.username = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 resolve(rows);
             });
@@ -131,9 +137,11 @@ function insertNewUser(query) {
         conn.connect(function (err) {
             if (err) throw err;
             console.log("Connected! Insert user");
+
+            let params = [firstName, lastName, username, password];
             let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
-            conn.query(sql, [firstName, lastName, username, password], function (err, result) {
+            conn.query(sql, params, function (err, result) {
                 if (err) throw err;
                 resolve(result);
             });
@@ -151,8 +159,9 @@ function insertAppointment(body, scheduleId) {
             console.log("Connected! Insert appointment");
 
             let sql = `INSERT INTO appointment
-                        (scheduleId, description, date, startTime, endTime)
-                         VALUES (?,?,?,?,?)`;
+                       (scheduleId, description, date, startTime, endTime)
+                       VALUES (?,?,?,?,?)
+                       `;
 
             let params = [scheduleId, body.description, body.date, body.startTime, body.endTime];
 
@@ -176,15 +185,18 @@ function deleteAppointment(body, scheduleId) {
             let startTime = body.startTime + ":00";
             let endTime = body.endTime + ":00";
 
+            let params = [scheduleId, body.description, body.date, startTime, endTime];
+
             let sql = `DELETE
                        FROM appointment
-                       WHERE scheduleId = ${scheduleId}
-                       AND description = '${body.description}' 
-                       AND date = '${body.date}' 
-                       AND startTime = '${startTime}' 
-                       AND endTime = '${endTime}';`;
+                       WHERE scheduleId = ?
+                       AND description = ? 
+                       AND date = ?
+                       AND startTime = ?
+                       AND endTime = ?;
+                       `;
 
-            conn.query(sql,function (err, rows, fields) {
+            conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
                 resolve(rows);
@@ -193,18 +205,86 @@ function deleteAppointment(body, scheduleId) {
     });//promise
 }//insertAppointment
 
-function getScheduleId(username){
+function getScheduleId(username) {
     let conn = dbConnection();
 
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
 
+            let params = [username];
             let sql = `SELECT s.scheduleId
-                              FROM user u JOIN schedule s ON u.userId = s.scheduleId
-                              WHERE u.username LIKE '${username}';`;
+                       FROM user u JOIN schedule s ON u.userId = s.scheduleId
+                       WHERE u.username = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}
+
+function getGroups() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT groupName 
+                       FROM rfgh18tfdnisudwj.group;
+                       `;
 
             conn.query(sql, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}
+
+function getSearchResult(query) {
+    let searchName = query.searchName;
+    let searchUsername = query.searchUsername;
+    let searchGroup = query.searchGroup;
+    let sortBy = query.sortBy;
+
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [];
+            let sql = `SELECT u.firstName, u. username, g.groupName
+                       FROM user u, groupmember m, rfgh18tfdnisudwj.group g
+                       WHERE u.userId = m.userId
+                       AND m.groupId = g.groupId
+                       `;
+
+            if (searchName) {
+                sql += " AND u.firstName = ?";
+                params.push(searchName);
+            }
+            if (searchUsername) {
+                sql += " AND u.username = ?";
+                params.push(searchUsername);
+            }
+            if (searchGroup && searchGroup != "Select one") {
+                sql += " AND g.groupName = ?";
+                params.push(searchGroup);
+            }
+            if (sortBy) {
+                sql += " ORDER BY " + sortBy;
+            }
+
+            sql += ";";
+
+            conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
                 resolve(rows);
