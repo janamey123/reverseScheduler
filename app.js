@@ -225,7 +225,7 @@ function getScheduleId(username) {
             });
         });//connect
     });//promise
-}
+}//getScheduleId
 
 function getGroups() {
     let conn = dbConnection();
@@ -245,7 +245,7 @@ function getGroups() {
             });
         });//connect
     });//promise
-}
+}//getGroups
 
 function getSearchResult(query) {
     let searchName = query.searchName;
@@ -291,7 +291,7 @@ function getSearchResult(query) {
             });
         });//connect
     });//promise
-}
+}//getSearchResult
 
 function dbConnection() {
     let conn = mysql.createConnection({
@@ -301,7 +301,7 @@ function dbConnection() {
         database: "rfgh18tfdnisudwj"
     });//createConnection
     return conn;
-}
+}//dbConnection
 
 // starting server
 app.listen(process.env.PORT || 3000, process.env.IP, function () {
