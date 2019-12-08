@@ -1,8 +1,11 @@
 const express = require("express");
 const mysql = require("mysql");
 const app = express();
+const session = require("express-session");
+const path = require("path");
+app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, 'public')));
 //app.use('/', loginRouter );
 
 // routes
@@ -74,11 +77,27 @@ app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
 
-app.get("/loginRequest", async function (req, res) {
-    let user = await getUser(req.query);
-    let success = false;
+app.post("/loginRequest", function (req, res, next) {
+    //let user = await getUser(req.query);
+    //let success = false;
     console.log('loginRequest');
-    res.send(true);
+    
+    
+    //TODO: Do something to log in...
+    let successful = false;
+    
+    if(req.body.username === 'admin' && req.body.password === 'admin') {
+        successful = true;
+        //req.session.username = req.body.username;
+    } else {
+        //delete req.session.username;
+    }
+   
+    //console.log("req.body: ", req.body);
+   
+    //Return success or failure
+    res.send(successful);
+    
 });
 
 app.get("/signingUpRequest", async function (req, res) {
