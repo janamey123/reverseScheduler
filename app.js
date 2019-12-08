@@ -279,9 +279,7 @@ function getSearchResult(query) {
                 params.push(searchGroup);
             }
             if (sortBy) {
-                sql += " ORDER BY = ?";
-                console.log("SQL: " + sql);
-                params.push(sortBy);
+                sql += " ORDER BY " + sortBy;
             }
 
             sql += ";";
