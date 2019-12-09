@@ -8,6 +8,33 @@ Password: <input type="text" id="password" name="password">
 <button id="signUpBtn" class="btn btn-lg btn-info"> Sign up here!</button>
 <br><br>
 <div id="loginError"></div>
+<br><br>
+<h3>User section:</h3>
+<br><br>
+First name: <input type="text" id="searchName" name="searchName">
+<br><br>
+Username: <input type="text" id="searchUsername" name="searchUsername">
+<br><br>
+Group name:
+<select name="searchGroup" id="searchGroup">
+    <option value=""> Select One</option>
+    <% groups.forEach(function(i){ %>
+        <option> <%= i.groupName %>  </option>
+    <% }); %>
+</select>
+<br><br>
+Sort by:
+<input type="radio" id="fn" name="sortBy" value="fn"> <label for="fn">First name</label>
+<input type="radio" id="un" name="sortBy" value="un"> <label for="un">Username</label>
+<input type="radio" id="gn" name="sortBy" value="gn"> <label for="gn">Group name</label>
+<br><br>
+<button id="searchBtn" class="btn btn-lg btn-info">Search</button>
+<br>
+<div id="searchError"></div>
+<br>
+<div id="h"></div>
+<div id="result"></div>
+<br><br>
 
 <script>
     // change from login page to sign up page
@@ -27,7 +54,7 @@ Password: <input type="text" id="password" name="password">
                 "password": password
             },
             success: function (result, status) {
-                alert(result);
+                //alert(result);
                 if (result == false) {
                     $("#loginError").html("Username or password wrong! Try again.");
                 } else {
@@ -35,6 +62,49 @@ Password: <input type="text" id="password" name="password">
                 }
             }
         });//ajax
-    });//signUpBtn
+    });//loginUpBtn
+
+    $("#searchBtn").on("click", function () {
+        let searchUsername = $("#searchUsername").val();
+        let searchName = $("#searchName").val();
+        let searchGroup = $("#searchGroup").val();
+        let sortByFirstName = $("#fn").is(":checked");
+        let sortByUsername = $("#un").is(":checked");
+        let sortByGroupName = $("#gn").is(":checked");
+        let sortBy = "";
+
+        if (sortByFirstName) {
+            sortBy = "firstName";
+        } else if (sortByUsername) {
+            sortBy = "username";
+        } else if (sortByGroupName) {
+            sortBy = "groupName";
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/userSearchSection",
+            dataType: "json",
+            data: {
+                "searchUsername": searchUsername,
+                "searchName": searchName,
+                "searchGroup": searchGroup,
+                "sortBy": sortBy
+            },
+            success: function (result, status) {
+
+                for (let i = 0; i < result.length; i++) {
+                    $("#result").append(`<div name="result" id="${i}"></div>`);
+                }
+
+                $("#h").html("First name - Username - Group name:");
+
+                for (let i = 0; i < result.length; i++) {
+                    let key = "\#" + i;
+                    $(key).html(result[i].firstName + " - " + result[i].username + " - " + result[i].groupName);
+                }
+            }
+        });//ajax
+    });//searchBtn
 </script>
 <% include partials/footer %>
