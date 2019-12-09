@@ -46,15 +46,15 @@ Sort by:
         let username = $("#username").val();
         let password = $("#password").val();
         $.ajax({
-            method: "GET",
-            url: "/loginRequest",
+            method: "POST",
+            url: "/",
             dataType: "json",
             data: {
                 "username": username,
                 "password": password
             },
             success: function (result, status) {
-                //alert(result);
+                alert(result);
                 if (result == false) {
                     $("#loginError").html("Username or password wrong! Try again.");
                 } else {

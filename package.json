@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/janamey123/reverseScheduler#readme",
   "dependencies": {
+    "bcrypt": "^3.0.7",
     "ejs": "^2.7.2",
     "express": "^4.17.1",
+    "express-session": "^1.17.0",
     "googleapis": "^39.2.0",
     "mysql": "^2.17.1"
   }

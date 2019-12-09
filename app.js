@@ -1,32 +1,66 @@
 const express = require("express");
 const mysql = require("mysql");
 const app = express();
+const session = require('express-session');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 app.set("view engine", "ejs");
 app.use(express.static("public"));
-//app.use('/', loginRouter );
+app.use(session({
+    secret: "top secret!",
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(express.urlencoded({extended: true}));
 
 // routes
 app.get("/", async function (req, res) {
     let groups = await getGroups();
-    res.render("index", {title: 'login', "groups": groups});
-});
-app.post("/", function (req, res) {
-    // TODO: do something to login
-
-    //Return success or failure
-    res.json({});
-});
-app.get("/dashboard", function (req, res) {
-    res.render("dashboard", {
-        title: 'Logged in Dashboard'
-    });
+    res.render("index", {"groups": groups});
 });
 
-app.get("/account", function (req, res) {
+app.post("/", async function (req, res) {
+    let username = req.body.username;
+    let password = req.body.password;
+
+    let result = await checkUsername(username);
+    let userMatch = false;
+
+    console.dir(result);
+    let hashedPwd = "";
+    if (result.length > 0) {
+        hashedPwd = result[0].password;
+        if (result[0].username == username) {
+            userMatch = true;
+        }
+    }
+    let passwordMatch = await checkPassword(password, hashedPwd);
+    console.log('Test ' + userMatch + ' and ' + passwordMatch);
+    if (userMatch && passwordMatch) {
+        req.session.authenticated = true;
+        res.send(true);
+        //res.render("dashboard");
+    } else {
+        let groups = await getGroups();
+        res.send(false);
+        //res.render("index", {"loginError": true, "groups": groups});
+    }
+});
+
+app.get("/dashboard", isAuthenticated, function (req, res) {
+    res.render("dashboard");
+});
+
+app.get("/logout", function (req, res) {
+    req.session.destroy();
+    res.redirect("/");
+});
+
+app.get("/account", isAuthenticated, function (req, res) {
     res.render("account");
 });
 
-app.get("/addAppointment", function (req, res) {
+app.get("/addAppointment", isAuthenticated, function (req, res) {
     res.render("addAppointment");
 });
 
@@ -44,7 +78,7 @@ app.get("/addAppointmentRequest", async function (req, res) {
     }
 });
 
-app.get("/deleteAppointment", function (req, res) {
+app.get("/deleteAppointment", isAuthenticated, function (req, res) {
     res.render("deleteAppointment");
 });
 
@@ -66,19 +100,12 @@ app.get("/deleteAppointmentRequest", async function (req, res) {
     }
 });
 
-app.get("/groups", function (req, res) {
+app.get("/groups", isAuthenticated, function (req, res) {
     res.render("groups");
 });
 
 app.get("/signUp", function (req, res) {
     res.render("signUp");
-});
-
-app.get("/loginRequest", async function (req, res) {
-    let user = await getUser(req.query);
-    let success = false;
-    console.log('loginRequest');
-    res.send(true);
 });
 
 app.get("/signingUpRequest", async function (req, res) {
@@ -131,6 +158,7 @@ function insertNewUser(query) {
     let firstName = query.firstName;
     let lastName = query.lastName;
     let password = query.s_password;
+    var hash = bcrypt.hashSync(password, saltRounds);
 
     let conn = dbConnection();
     return new Promise(function (resolve, reject) {
@@ -138,7 +166,7 @@ function insertNewUser(query) {
             if (err) throw err;
             console.log("Connected! Insert user");
 
-            let params = [firstName, lastName, username, password];
+            let params = [firstName, lastName, username, hash];
             let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
             conn.query(sql, params, function (err, result) {
@@ -147,7 +175,6 @@ function insertNewUser(query) {
             });
         });//connect
     });//promise
-
 }//insertNewUser
 
 function insertAppointment(body, scheduleId) {
@@ -292,6 +319,44 @@ function getSearchResult(query) {
         });//connect
     });//promise
 }//getSearchResult
+
+function checkPassword(password, hashedValue) {
+    return new Promise(function (resolve, reject) {
+        bcrypt.compare(password, hashedValue, function (err, result) {
+            console.log("Result: " + result);
+            resolve(result);
+        });//compare
+    });//promise
+}//checkPassword
+
+/**
+ * Checks whether the username exists in database.
+ * if found, returns corresponding record.
+ * @param {string} username
+ * @return {array of objects}
+ */
+function checkUsername(username) {
+    let sql = "SELECT * FROM user WHERE username = ?";
+    return new Promise(function (resolve, reject) {
+        let conn = dbConnection();
+        conn.connect(function (err) {
+            if (err) throw err;
+            conn.query(sql, [username], function (err, rows, fields) {
+                if (err) throw err;
+                console.log("Rows found: " + rows.length);
+                resolve(rows);
+            });//query
+        });//conect
+    });//promise
+}//checkUsername
+
+function isAuthenticated(req, res, next) {
+    if (!req.session.authenticated) {
+        res.redirect("/");
+    } else {
+        next();
+    }
+}//isAuthenticated
 
 function dbConnection() {
     let conn = mysql.createConnection({
