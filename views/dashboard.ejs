@@ -8,6 +8,8 @@
 <br><br>
 <h4>My Schedule</h4>
 
+<div id="h"></div>
+<div id="events"></div>
 
 <br><br>
 
@@ -28,9 +30,31 @@
 <script>
     $(document).ready(function () {
 
-        function getUsersEvents(){
+        getUsersEvents();
 
-        }
+        function getUsersEvents() {
+            $.ajax({
+                method: "GET",
+                url: "/getUsersEvents",
+                dataType: "json",
+                success: function (result, status) {
+                    for (let i = 0; i < result.length; i++) {
+                        $("#events").append(`<div name="event" id="${i}"></div><button id="edit" class="btn btn-outline-info btn-sm">Edit appointment</button>`);
+                    }
+
+                    $("#h").html("Description - date - start time - end time");
+
+                    for (let i = 0; i < result.length; i++) {
+                        let key = "\#" + i;
+                        $(key).html(result[i].description + " - " + result[i].date + " - " + result[i].startTime + " - " + result[i].endTime);
+                    }
+                }
+            });//ajax
+        }//getUsersEvents
+
+        $("#edit").on("click", function () {
+
+        });
 
     });
 

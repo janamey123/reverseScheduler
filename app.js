@@ -99,9 +99,12 @@ app.get("/deleteAppointmentRequest", async function (req, res) {
 });
 
 app.get("/getUsersEvents", async function (req, res) {
-    let scheduleId = await getScheduleId(req.query.username);
-    console.log("name: " + req.query.username);
-    //let id = scheduleId[0].scheduleId;
+    let username = req.session.username;
+    let scheduleId = await getScheduleId(username);
+    let id = scheduleId[0].scheduleId;
+
+    let events = await getEvents(id);
+    res.send(events);
 });
 
 app.get("/groups", isAuthenticated, function (req, res) {
@@ -386,6 +389,29 @@ function isAuthenticated(req, res, next) {
         next();
     }
 }//isAuthenticated
+
+function getEvents(scheduleId){
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT *
+                       FROM appointment a
+                       WHERE a.scheduleId = ?;
+                       `;
+
+            conn.query(sql, [scheduleId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+
+
+}//getEvents
 
 function dbConnection() {
     let conn = mysql.createConnection({

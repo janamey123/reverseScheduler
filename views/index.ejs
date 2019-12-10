@@ -29,7 +29,7 @@ Sort by:
 <input type="radio" id="gn" name="sortBy" value="gn"> <label for="gn">Group name</label>
 <br><br>
 <button id="searchBtn" class="btn btn-lg btn-info">Search</button>
-<br>
+<br><br>
 <div id="searchError"></div>
 <br>
 <div id="h"></div>
@@ -83,6 +83,15 @@ Sort by:
         let sortByUsername = $("#un").is(":checked");
         let sortByGroupName = $("#gn").is(":checked");
         let sortBy = "";
+
+        $("#searchError").hide();
+
+        if (searchUsername == "" && searchName == "" && searchGroup == "") {
+            $("#searchError").attr("class", "text-danger");
+            $("#searchError").html("Please enter a username, first name, or choose a group name.");
+            $("#searchError").show();
+            return;
+        }
 
         if (sortByFirstName) {
             sortBy = "firstName";
