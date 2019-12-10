@@ -152,11 +152,8 @@ app.get("/groups", isAuthenticated, function (req, res) {
 app.get("/getUsersGroups", async function (req, res) {
     let username = req.session.username;
     let groups = await getUsersGroups(username);
-    let groupmember = await getGroupmember(groups);
 
-    let groupAndMember = [groups, groupmember];
-
-    res.send(groupAndMember);
+    res.send(groups);
 });
 
 app.get("/signUp", function (req, res) {
@@ -363,11 +360,11 @@ function getUsersGroups(username) {
         conn.connect(function (err) {
             if (err) throw err;
 
-            let sql = `SELECT g.groupName
+            let sql = `SELECT g.groupname, u.username
                        FROM \`user\` u 
                        JOIN \`groupmember\` m ON u.userId = m.userId 
                        JOIN \`group\` g ON m.groupId = g.groupId
-                       WHERE u.username = ?;
+                       ORDER BY g.groupname, u.username;;
                        `;
 
             conn.query(sql, [username], function (err, rows, fields) {
@@ -378,36 +375,6 @@ function getUsersGroups(username) {
         });//connect
     });//promise
 }//getUsersGroups
-
-function getGroupmember(groups) {
-    let conn = dbConnection();
-    let groupMember = [];
-
-    return new Promise(function (resolve, reject) {
-
-        for (let i = 0; i < groups.length; i++) {
-            conn.connect(function (err) {
-                if (err) throw err;
-
-                let params = [groups[i].groupName];
-
-                let sql = `SELECT u.username
-                           FROM \`user\` u 
-                           JOIN \`groupmember\` m ON u.userId = m.userId 
-                           JOIN \`group\` g ON m.groupId = g.groupId
-                           WHERE g.groupname = ?;
-                       `;
-
-                conn.query(sql, params, function (err, rows, fields) {
-                    if (err) throw err;
-                    conn.end();
-                    groupMember.push(rows);
-                });
-            });//connect
-            resolve(groupMember);
-        }
-    });//promise
-}//getGroupmember
 
 function getSearchResult(query) {
     let searchName = query.searchName;

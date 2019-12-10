@@ -28,7 +28,9 @@ Groupname:      Groupmember:
                 url: "/getUsersGroups",
                 dataType: "json",
                 success: function (result, status) {
-                    let key = "";
+                    let groupKey = "";
+                    let memberKey = "";
+
                     $("#message").hide();
 
                     if (result.length == 0) {
@@ -37,14 +39,19 @@ Groupname:      Groupmember:
                         $("#message").show();
                     } else {
                         for (let i = 0; i < result.length; i++) {
-                            $("#group").append(`<div name="group" id="${i}">`);
+                            $("#group").append(`<div name="group" id="group${i}">`);
+                            $("#member").append(`<div name="member" id="member${i}"</div>`);
                         }
 
-                        alert(result[0].groupName);
+                        alert(result[1].groupname);
+                        alert(result[1].username);
+
 
                         for (let i = 0; i < result.length; i++) {
-                            key = "\#" + i;
-                            $(key).html(result[i].groupName);
+                            groupKey = "\#group" + i;
+                            $(groupKey).html(result[i].groupname);
+                            memberKey = "\#member" + i;
+                            $(memberKey).html(result[i].username);
 
                         }
                     }
