@@ -6,18 +6,68 @@
     <a href="/groups">My groups</a>
 </div>
 <br><br>
-<h4>My Scheduler</h4>
-<iframe src="https://calendar.google.com/calendar/embed?src=csumb.edu_aapus3l7rlkd8ob3nh97hb530g%40group.calendar.google.com&ctz=America%2FLos_Angeles"
-        style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+<h4>My Schedule</h4>
+
+<div id="h"></div>
+<br>
+<div id="events"></div>
+<br><br>
+<div id="message"></div>
+
 <br><br>
 
 <p><a href="/addAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Add new appointment!</a></p>
 <p><a href="/deleteAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete an appointment!</a></p>
+<p><a href="/editAppointment"
+      onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Edit an appointment!</a></p>
+<br><br>
+
+<form action="/logout">
+    <button class="btn btn-lg btn-danger">Logout</button>
+</form>
 
 
 <script>
+    $(document).ready(function () {
+
+        getUsersEvents();
+
+        function getUsersEvents() {
+            $.ajax({
+                method: "GET",
+                url: "/getUsersEvents",
+                dataType: "json",
+                success: function (result, status) {
+                    let str = "";
+                    let date = "";
+                    let key = "";
+                    $("#message").hide();
+
+                    if (result.length == 0) {
+                        $("#message").attr("class", "text-info");
+                        $("#message").html("You currently don't have any appointments.")
+                        $("#message").show();
+                    } else {
+                        for (let i = 0; i < result.length; i++) {
+                            $("#events").append(`<div name="event" id="${i}">`);
+                        }
+
+                        $("#h").html("Description - date - start time - end time");
+
+                        for (let i = 0; i < result.length; i++) {
+                            str = result[i].date;
+                            date = str.substring(0, 10);
+                            key = "\#" + i;
+                            $(key).html(result[i].description + " - " + date + " - " + result[i].startTime + " - " + result[i].endTime);
+                        }
+                    }
+                }
+            });//ajax
+        }//getUsersEvents
+    });//ready
+
     var popupWindow = null;
 
     function centeredPopup(url, winName, w, h, scroll) {
@@ -27,5 +77,9 @@
             'height=' + h + ',width=' + w + ',top=' + TopPosition + ',left=' + LeftPosition + ',scrollbars=' + scroll + ',resizable'
         popupWindow = window.open(url, winName, settings)
     }
+</script>
+<script async defer src="https://apis.google.com/js/api.js"
+        onload="this.onload=function(){};handleClientLoad()"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
 <% include partials/footer %>

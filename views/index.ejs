@@ -29,7 +29,7 @@ Sort by:
 <input type="radio" id="gn" name="sortBy" value="gn"> <label for="gn">Group name</label>
 <br><br>
 <button id="searchBtn" class="btn btn-lg btn-info">Search</button>
-<br>
+<br><br>
 <div id="searchError"></div>
 <br>
 <div id="h"></div>
@@ -37,84 +37,94 @@ Sort by:
 <br><br>
 
 <script>
-    $(document).ready(function(){
-        // change from login page to sign up page
-        $("#signUpBtn").on("click", function () {
-            location.href = "/signUp";
-        });//signUpBtn
-    
-        $("#loginBtn").on("click", function (e) {
-            e.preventDefault();
-            
-            $.ajax({
-                method: "POST",
-                url: "/loginRequest",
-                dataType: "json",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    "username": $("#username").val(),
-                    "password": $("#password").val()
-                }),
-                success: function (result, status) {
-                    //alert(result);
-                    if (result.successful) {
-                        window.location.href = "/dashboard";
-                    } else {
-                        $("#loginError").html("Username or password wrong! Try again.");
-                    }
-                },
-                error: function(xhr, status, error) {
-                    err = eval("Error: (" + xhr.responseText + ")");
-                    console.error(err);
-                },
-                complete: function(data, status) {
-                    console.log(status);
+    // change from login page to sign up page
+    $("#signUpBtn").on("click", function () {
+        location.href = "/signUp";
+    });//signUpBtn
+
+    $("#loginBtn").on("click", function () {
+        let username = $("#username").val();
+        let password = $("#password").val();
+
+        if (username == "") {
+            $("#loginError").attr("class", "text-danger");
+            $("#loginError").html("Please enter a username.");
+            return;
+        } else if (password == "") {
+            $("#loginError").attr("class", "text-danger");
+            $("#loginError").html("Please enter a password.");
+            return;
+        }
+
+        $.ajax({
+            method: "POST",
+            url: "/",
+            dataType: "json",
+            data: {
+                "username": username,
+                "password": password
+            },
+            success: function (result, status) {
+                if (result == false) {
+                    $("#loginError").attr("class", "text-danger");
+                    $("#loginError").html("Username or password wrong! Try again.");
+                } else {
+                    location.href = "/dashboard";
                 }
-            });//ajax
-        });//loginUpBtn
-    
-        $("#searchBtn").on("click", function () {
-            let searchUsername = $("#searchUsername").val();
-            let searchName = $("#searchName").val();
-            let searchGroup = $("#searchGroup").val();
-            let sortByFirstName = $("#fn").is(":checked");
-            let sortByUsername = $("#un").is(":checked");
-            let sortByGroupName = $("#gn").is(":checked");
-            let sortBy = "";
-    
-            if (sortByFirstName) {
-                sortBy = "firstName";
-            } else if (sortByUsername) {
-                sortBy = "username";
-            } else if (sortByGroupName) {
-                sortBy = "groupName";
             }
-    
-            $.ajax({
-                method: "GET",
-                url: "/userSearchSection",
-                dataType: "json",
-                data: {
-                    "searchUsername": searchUsername,
-                    "searchName": searchName,
-                    "searchGroup": searchGroup,
-                    "sortBy": sortBy
-                },
-                success: function (result, status) {
-    
-                    for (let i = 0; i < result.length; i++) {
-                        $("#result").append(`<div name="result" id="${i}"></div>`);
-                    }
-    
-                    $("#h").html("First name - Username - Group name:");
-    
-                    for (let i = 0; i < result.length; i++) {
-                        let key = "\#" + i;
-                        $(key).html(result[i].firstName + " - " + result[i].username + " - " + result[i].groupName);
-                    }
+        });//ajax
+    });//loginUpBtn
+
+    $("#searchBtn").on("click", function () {
+        let searchUsername = $("#searchUsername").val();
+        let searchName = $("#searchName").val();
+        let searchGroup = $("#searchGroup").val();
+        let sortByFirstName = $("#fn").is(":checked");
+        let sortByUsername = $("#un").is(":checked");
+        let sortByGroupName = $("#gn").is(":checked");
+        let sortBy = "";
+
+        $("#searchError").hide();
+
+        if (searchUsername == "" && searchName == "" && searchGroup == "") {
+            $("#searchError").attr("class", "text-danger");
+            $("#searchError").html("Please enter a username, first name, or choose a group name.");
+            $("#searchError").show();
+            return;
+        }
+
+        if (sortByFirstName) {
+            sortBy = "firstName";
+        } else if (sortByUsername) {
+            sortBy = "username";
+        } else if (sortByGroupName) {
+            sortBy = "groupName";
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/userSearchSection",
+            dataType: "json",
+            data: {
+                "searchUsername": searchUsername,
+                "searchName": searchName,
+                "searchGroup": searchGroup,
+                "sortBy": sortBy
+            },
+            success: function (result, status) {
+
+                for (let i = 0; i < result.length; i++) {
+                    $("#result").append(`<div name="result" id="${i}"></div>`);
                 }
-            });//ajax
-        });//searchBtn
-    });
+
+                $("#h").html("First name - Username - Group name:");
+
+                for (let i = 0; i < result.length; i++) {
+                    let key = "\#" + i;
+                    $(key).html(result[i].firstName + " - " + result[i].username + " - " + result[i].groupName);
+                }
+            }
+        });//ajax
+    });//searchBtn
 </script>
 <% include partials/footer %>
