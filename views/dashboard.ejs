@@ -8,8 +8,35 @@
 <br><br>
 <h4>My Schedule</h4>
 
+<table class="centered">
+    <tr id="table-header">
+        <td><strong>Description</strong></td>
+        <td><strong>Date</strong></td>
+        <td><strong>Start time</strong></td>
+        <td><strong>End time</strong></td>
+    </tr>
+    <tr class="table-row">
+        <td>
+            <div id="desc"></div>
+        </td>
+        <td>
+            <div id="dt"></div>
+        </td>
+        <td>
+            <div id="st"></div>
+        </td>
+        <td>
+            <div id="et"></div>
+        </td>
+    </tr>
+</table>
+
+
+
 <div id="h"></div>
 <br>
+
+
 <div id="events"></div>
 <br><br>
 <div id="message"></div>
@@ -41,7 +68,11 @@
                 success: function (result, status) {
                     let str = "";
                     let date = "";
-                    let key = "";
+                    let descKey = "";
+                    let dtKey = "";
+                    let stKey = "";
+                    let etKey = "";
+
                     $("#message").hide();
 
                     if (result.length == 0) {
@@ -50,7 +81,11 @@
                         $("#message").show();
                     } else {
                         for (let i = 0; i < result.length; i++) {
-                            $("#events").append(`<div name="event" id="${i}">`);
+                            $("#desc").append(`<div name="desc" id="desc${i}">`);
+                            $("#dt").append(`<div name="dt" id="dt${i}">`);
+                            $("#st").append(`<div name="st" id="st${i}">`);
+                            $("#et").append(`<div name="et" id="et${i}">`);
+
                         }
 
                         $("#h").html("Description - date - start time - end time");
@@ -58,8 +93,16 @@
                         for (let i = 0; i < result.length; i++) {
                             str = result[i].date;
                             date = str.substring(0, 10);
-                            key = "\#" + i;
-                            $(key).html(result[i].description + " - " + date + " - " + result[i].startTime + " - " + result[i].endTime);
+                            descKey = "\#desc" + i;
+                            dtKey = "\#dt" + i;
+                            stKey = "\#st" + i;
+                            etKey = "\#et" + i;
+
+                            $(descKey).html(result[i].description);
+                            $(dtKey).html(date);
+                            $(stKey).html(result[i].startTime);
+                            $(etKey).html(result[i].endTime);
+
                         }
                     }
                 }

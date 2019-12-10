@@ -7,12 +7,26 @@
 </div>
 
 <br><br>
-My groups
-<br><br>
+<h3>My groups</h3>
+<br>
 
-Groupname:      Groupmember:
+<table class="centered">
+    <tr id="table-header">
+        <td><strong>Groupname</strong></td>
+        <td><strong>Groupmember</strong></td>
+    </tr>
+    <tr class="table-row">
+        <td>
+            <div id="group"></div>
+        </td>
+        <td>
+            <div id="member"></div>
+        </td>
+    </tr>
+</table>
 
-<div id="group"></div> <div id="member"></div>
+
+<div id="member"></div>
 
 
 <div id="message"></div>
@@ -42,10 +56,6 @@ Groupname:      Groupmember:
                             $("#group").append(`<div name="group" id="group${i}">`);
                             $("#member").append(`<div name="member" id="member${i}"</div>`);
                         }
-
-                        alert(result[1].groupname);
-                        alert(result[1].username);
-
 
                         for (let i = 0; i < result.length; i++) {
                             groupKey = "\#group" + i;
