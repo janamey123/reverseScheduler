@@ -44,13 +44,10 @@ Groupname:      Groupmember:
                             $("#group").append(`<div name="group" id="${i}">`);
                         }
 
-                        $("#h").html("Description - date - start time - end time");
 
                         for (let i = 0; i < result.length; i++) {
-                            str = result[i].date;
-                            date = str.substring(0, 10);
                             key = "\#" + i;
-                            $(key).html(result[i].description + " - " + date + " - " + result[i].startTime + " - " + result[i].endTime);
+                            $(key).html(result[i].groupName);
                         }
                     }
                 }

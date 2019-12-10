@@ -149,6 +149,12 @@ app.get("/groups", isAuthenticated, function (req, res) {
     res.render("groups");
 });
 
+app.get("/getUsersGroups", async function (req, res) {
+    let username = req.session.username;
+    let groups = await getUsersGroups(username);
+    res.send(groups);
+});
+
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
@@ -346,6 +352,30 @@ function getGroups() {
     });//promise
 }//getGroups
 
+function getUsersGroups(username) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT g.groupName
+                       FROM user u, groupmember m, rfgh18tfdnisudwj.group g
+                       WHERE u.userId = m.userId 
+                       AND m.groupId = g.groupId 
+                       AND u.username = ?;
+                       `;
+
+            conn.query(sql, [username],function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+
+}//getUsersGroups
+
 function getSearchResult(query) {
     let searchName = query.searchName;
     let searchUsername = query.searchUsername;
@@ -502,7 +532,7 @@ function changeAppointment(query, id) {
             });
         });//connect
     });//promise
-}
+}//changeAppointment
 
 function dbConnection() {
     let conn = mysql.createConnection({
