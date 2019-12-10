@@ -22,12 +22,11 @@ app.get("/", async function (req, res) {
 app.post("/", async function (req, res) {
     let username = req.body.username;
     let password = req.body.password;
-
-    let result = await checkUsername(username);
+    let hashedPwd = "";
     let userMatch = false;
 
-    console.dir(result);
-    let hashedPwd = "";
+    let result = await checkUsername(username);
+
     if (result.length > 0) {
         hashedPwd = result[0].password;
         if (result[0].username == username) {
@@ -35,15 +34,14 @@ app.post("/", async function (req, res) {
         }
     }
     let passwordMatch = await checkPassword(password, hashedPwd);
-    console.log('Test ' + userMatch + ' and ' + passwordMatch);
+
     if (userMatch && passwordMatch) {
         req.session.authenticated = true;
+        req.session.username = username;
         res.send(true);
-        //res.render("dashboard");
     } else {
         let groups = await getGroups();
         res.send(false);
-        //res.render("index", {"loginError": true, "groups": groups});
     }
 });
 
@@ -65,7 +63,7 @@ app.get("/addAppointment", isAuthenticated, function (req, res) {
 });
 
 app.get("/addAppointmentRequest", async function (req, res) {
-    let scheduleId = await getScheduleId(req.query.username);
+    let scheduleId = await getScheduleId(req.session.username);
     let id = scheduleId[0].scheduleId;
     let success = false;
 
@@ -83,7 +81,7 @@ app.get("/deleteAppointment", isAuthenticated, function (req, res) {
 });
 
 app.get("/deleteAppointmentRequest", async function (req, res) {
-    let scheduleId = await getScheduleId(req.query.username);
+    let scheduleId = await getScheduleId(req.session.username);
     let id = scheduleId[0].scheduleId;
     let success = false;
 
@@ -117,8 +115,13 @@ app.get("/signingUpRequest", async function (req, res) {
         }
     } catch (e) {
         let insert = await insertNewUser(req.query);
-        success = true;
-        res.send(success);
+        if (insert.affectedRows == 0) {
+            res.send(success);
+        } else {
+            let schedule = await createNewSchedule(req.query);
+            success = true;
+            res.send(success);
+        }
     }
 });
 
@@ -176,6 +179,26 @@ function insertNewUser(query) {
         });//connect
     });//promise
 }//insertNewUser
+
+async function createNewSchedule(query) {
+    let user = await getUser(query);
+    let userId = user[0].userId;
+
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = 'INSERT INTO schedule (userId) VALUES (?);';
+
+            conn.query(sql, [userId], function (err, result) {
+                if (err) throw err;
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//createNewSchedule
 
 function insertAppointment(body, scheduleId) {
     let conn = dbConnection();
@@ -323,7 +346,6 @@ function getSearchResult(query) {
 function checkPassword(password, hashedValue) {
     return new Promise(function (resolve, reject) {
         bcrypt.compare(password, hashedValue, function (err, result) {
-            console.log("Result: " + result);
             resolve(result);
         });//compare
     });//promise
@@ -343,10 +365,9 @@ function checkUsername(username) {
             if (err) throw err;
             conn.query(sql, [username], function (err, rows, fields) {
                 if (err) throw err;
-                console.log("Rows found: " + rows.length);
                 resolve(rows);
             });//query
-        });//conect
+        });//connect
     });//promise
 }//checkUsername
 

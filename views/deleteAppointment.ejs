@@ -33,8 +33,6 @@ Description: <input type="text" id="description" name="description">
         let startTime = $("#startTime").val();
         let endTime = $("#endTime").val();
         let description = $("#description").val();
-        //TODO get actual username after Login works
-        let username = "Jana";
 
         $.ajax({
             method: "GET",
@@ -44,8 +42,7 @@ Description: <input type="text" id="description" name="description">
                 "date": date,
                 "startTime": startTime,
                 "endTime": endTime,
-                "description": description,
-                "username": username
+                "description": description
             },
             success: function (result, status) {
                 if (result == false) {
