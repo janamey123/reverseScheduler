@@ -50,7 +50,7 @@ Sort by:
             $("#loginError").attr("class", "text-danger");
             $("#loginError").html("Please enter a username.");
             return;
-        } else if (password) {
+        } else if (password == "") {
             $("#loginError").attr("class", "text-danger");
             $("#loginError").html("Please enter a password.");
             return;

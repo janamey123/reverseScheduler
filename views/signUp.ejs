@@ -9,10 +9,15 @@ Last name: <input type="text" id="s_lastName" name="s_lastName">
 Password: <input type="text" id="s_password" name="s_password">
 <br><br>
 <button id="signingUpBtn" class="btn btn-lg btn-info"> Sign up </button>
-<button id="signingUpBtn" class="btn btn-lg btn-info"> Log in </button>
+<button id="loginBtn" class="btn btn-lg btn-info"> Log in </button>
 <br><br>
 <div id="signUpError"></div>
 <script>
+    // change from sig up page to login page
+    $("#loginBtn").on("click", function () {
+        location.href = "/";
+    });//signUpBtn
+
     // user signs up
     $("#signingUpBtn").on("click", function () {
         let username = $("#s_username").val();
