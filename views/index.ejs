@@ -45,6 +45,17 @@ Sort by:
     $("#loginBtn").on("click", function () {
         let username = $("#username").val();
         let password = $("#password").val();
+
+        if (username == "") {
+            $("#loginError").attr("class", "text-danger");
+            $("#loginError").html("Please enter a username.");
+            return;
+        } else if (password) {
+            $("#loginError").attr("class", "text-danger");
+            $("#loginError").html("Please enter a password.");
+            return;
+        }
+
         $.ajax({
             method: "POST",
             url: "/",
@@ -55,6 +66,7 @@ Sort by:
             },
             success: function (result, status) {
                 if (result == false) {
+                    $("#loginError").attr("class", "text-danger");
                     $("#loginError").html("Username or password wrong! Try again.");
                 } else {
                     location.href = "/dashboard";

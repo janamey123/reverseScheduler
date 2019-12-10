@@ -34,6 +34,24 @@ Description: <input type="text" id="description" name="description">
         let endTime = $("#endTime").val();
         let description = $("#description").val();
 
+        if (date == "" ) {
+            $("#addAppointmentError").attr("class", "text-danger");
+            $("#addAppointmentError").html("Please enter a date!");
+            return;
+        } else if (startTime =="") {
+            $("#addAppointmentError").attr("class", "text-danger");
+            $("#addAppointmentError").html("Please enter a start time!");
+            return;
+        } else if (endTime == "") {
+            $("#addAppointmentError").attr("class", "text-danger");
+            $("#addAppointmentError").html("Please enter a end time!");
+            return;
+        } else if (description == "") {
+            $("#addAppointmentError").attr("class", "text-danger");
+            $("#addAppointmentError").html("Please enter a description!");
+            return;
+        }
+
         $.ajax({
             method: "GET",
             url: "/addAppointmentRequest",
@@ -46,8 +64,10 @@ Description: <input type="text" id="description" name="description">
             },
             success: function (result, status) {
                 if (result == false) {
+                    $("#addAppointmentError").attr("class", "text-danger");
                     $("#addAppointmentError").html("Sorry, your appointment was not added to your schedule.");
                 } else {
+                    $("#addAppointmentError").attr("class", "text-success");
                     $("#addAppointmentError").html("Appointment was added to your schedule successfully.");
                 }
             }

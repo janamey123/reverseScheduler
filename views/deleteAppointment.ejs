@@ -34,6 +34,24 @@ Description: <input type="text" id="description" name="description">
         let endTime = $("#endTime").val();
         let description = $("#description").val();
 
+        if (date == "" ) {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a date!");
+            return;
+        } else if (startTime =="") {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a start time!");
+            return;
+        } else if (endTime == "") {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a end time!");
+            return;
+        } else if (description == "") {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a description!");
+            return;
+        }
+
         $.ajax({
             method: "GET",
             url: "/deleteAppointmentRequest",
@@ -46,8 +64,10 @@ Description: <input type="text" id="description" name="description">
             },
             success: function (result, status) {
                 if (result == false) {
+                    $("#deleteAppointmentError").attr("class", "text-danger");
                     $("#deleteAppointmentError").html("Sorry, your appointment was not deleted from your schedule.");
                 } else {
+                    $("#deleteAppointmentError").attr("class", "text-success");
                     $("#deleteAppointmentError").html("Appointment was deleted from your schedule successfully.");
                 }
             }
