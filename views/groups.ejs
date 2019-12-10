@@ -17,10 +17,6 @@ Groupname:      Groupmember:
 
 <div id="message"></div>
 <br><br>
-<div>
-    <button onclick="topFunction()" id="myBtn" title="Go to top">&uarr;</button>
-</div>
-<br><br>
 <script>
     $(document).ready(function () {
 
@@ -44,10 +40,12 @@ Groupname:      Groupmember:
                             $("#group").append(`<div name="group" id="${i}">`);
                         }
 
+                        alert(result[0].groupName);
 
                         for (let i = 0; i < result.length; i++) {
                             key = "\#" + i;
                             $(key).html(result[i].groupName);
+
                         }
                     }
                 }

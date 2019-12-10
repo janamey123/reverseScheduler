@@ -152,7 +152,11 @@ app.get("/groups", isAuthenticated, function (req, res) {
 app.get("/getUsersGroups", async function (req, res) {
     let username = req.session.username;
     let groups = await getUsersGroups(username);
-    res.send(groups);
+    let groupmember = await getGroupmember(groups);
+
+    let groupAndMember = [groups, groupmember];
+
+    res.send(groupAndMember);
 });
 
 app.get("/signUp", function (req, res) {
@@ -199,7 +203,7 @@ function getUser(query) {
             let params = [username];
 
             let sql = `SELECT *
-                       FROM user u
+                       FROM \`user\` u
                        WHERE u.username = ?;
                        `;
 
@@ -225,7 +229,7 @@ function insertNewUser(query) {
             console.log("Connected! Insert user");
 
             let params = [firstName, lastName, username, hash];
-            let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
+            let sql = 'INSERT INTO \`user\` (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
             conn.query(sql, params, function (err, result) {
                 if (err) throw err;
@@ -245,7 +249,7 @@ async function createNewSchedule(query) {
         conn.connect(function (err) {
             if (err) throw err;
 
-            let sql = 'INSERT INTO schedule (userId) VALUES (?);';
+            let sql = 'INSERT INTO \`schedule\` (userId) VALUES (?);';
 
             conn.query(sql, [userId], function (err, result) {
                 if (err) throw err;
@@ -263,7 +267,7 @@ function insertAppointment(body, scheduleId) {
             if (err) throw err;
             console.log("Connected! Insert appointment");
 
-            let sql = `INSERT INTO appointment
+            let sql = `INSERT INTO \`appointment\`
                        (scheduleId, description, date, startTime, endTime)
                        VALUES (?,?,?,?,?)
                        `;
@@ -293,7 +297,7 @@ function deleteAppointment(body, scheduleId) {
             let params = [scheduleId, body.description, body.date, startTime, endTime];
 
             let sql = `DELETE
-                       FROM appointment
+                       FROM \`appointment\`
                        WHERE scheduleId = ?
                        AND description = ? 
                        AND date = ?
@@ -319,7 +323,7 @@ function getScheduleId(username) {
 
             let params = [username];
             let sql = `SELECT s.scheduleId
-                       FROM user u JOIN schedule s ON u.userId = s.scheduleId
+                       FROM \`user\` u JOIN \`schedule\` s ON u.userId = s.scheduleId
                        WHERE u.username = ?;
                        `;
 
@@ -340,7 +344,7 @@ function getGroups() {
             if (err) throw err;
 
             let sql = `SELECT groupName 
-                       FROM rfgh18tfdnisudwj.group;
+                       FROM \`group\`;
                        `;
 
             conn.query(sql, function (err, rows, fields) {
@@ -360,21 +364,50 @@ function getUsersGroups(username) {
             if (err) throw err;
 
             let sql = `SELECT g.groupName
-                       FROM user u, groupmember m, rfgh18tfdnisudwj.group g
-                       WHERE u.userId = m.userId 
-                       AND m.groupId = g.groupId 
-                       AND u.username = ?;
+                       FROM \`user\` u 
+                       JOIN \`groupmember\` m ON u.userId = m.userId 
+                       JOIN \`group\` g ON m.groupId = g.groupId
+                       WHERE u.username = ?;
                        `;
 
-            conn.query(sql, [username],function (err, rows, fields) {
+            conn.query(sql, [username], function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();
                 resolve(rows);
             });
         });//connect
     });//promise
-
 }//getUsersGroups
+
+function getGroupmember(groups) {
+    let conn = dbConnection();
+    let groupMember = [];
+
+    return new Promise(function (resolve, reject) {
+
+        for (let i = 0; i < groups.length; i++) {
+            conn.connect(function (err) {
+                if (err) throw err;
+
+                let params = [groups[i].groupName];
+
+                let sql = `SELECT u.username
+                           FROM \`user\` u 
+                           JOIN \`groupmember\` m ON u.userId = m.userId 
+                           JOIN \`group\` g ON m.groupId = g.groupId
+                           WHERE g.groupname = ?;
+                       `;
+
+                conn.query(sql, params, function (err, rows, fields) {
+                    if (err) throw err;
+                    conn.end();
+                    groupMember.push(rows);
+                });
+            });//connect
+            resolve(groupMember);
+        }
+    });//promise
+}//getGroupmember
 
 function getSearchResult(query) {
     let searchName = query.searchName;
@@ -390,9 +423,9 @@ function getSearchResult(query) {
 
             let params = [];
             let sql = `SELECT u.firstName, u. username, g.groupName
-                       FROM user u, groupmember m, rfgh18tfdnisudwj.group g
-                       WHERE u.userId = m.userId
-                       AND m.groupId = g.groupId
+                       FROM \`user\` u 
+                       JOIN \`groupmember\` m ON u.userId = m.userId 
+                       JOIN \`group\` g ON m.groupId = g.groupId
                        `;
 
             if (searchName) {
@@ -458,7 +491,7 @@ function isAuthenticated(req, res, next) {
     }
 }//isAuthenticated
 
-function getEvents(scheduleId){
+function getEvents(scheduleId) {
     let conn = dbConnection();
 
     return new Promise(function (resolve, reject) {
@@ -466,7 +499,7 @@ function getEvents(scheduleId){
             if (err) throw err;
 
             let sql = `SELECT *
-                       FROM appointment a
+                       FROM \`appointment\` a
                        WHERE a.scheduleId = ?;
                        `;
 
@@ -479,7 +512,7 @@ function getEvents(scheduleId){
     });//promise
 }//getEvents
 
-function getAppointment(query, id){
+function getAppointment(query, id) {
     let conn = dbConnection();
 
     return new Promise(function (resolve, reject) {
@@ -491,7 +524,7 @@ function getAppointment(query, id){
             let params = [id, query.description, query.date, startTime, endTime];
 
             let sql = `SELECT *
-                       FROM appointment a
+                       FROM \`appointment\` a
                        WHERE a.scheduleId = ? 
                        AND description = ? 
                        AND date = ? 
@@ -519,12 +552,12 @@ function changeAppointment(query, id) {
             let endTime = query.endTime + ":00";
             let params = [query.description, query.date, startTime, endTime, id, query.appointmentId];
 
-            let sql = `UPDATE appointment a 
+            let sql = `UPDATE \`appointment\` a 
                        SET a.description = ?, a.date = ?, a.startTime = ?, a.endTime =  ? 
                        WHERE a.scheduleId = ? 
                        AND a.appointmentId = ?;
                        `;
-            console.log("in change sgdf");
+
             conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
                 conn.end();

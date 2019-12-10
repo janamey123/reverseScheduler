@@ -28,9 +28,6 @@
     <button class="btn btn-lg btn-danger">Logout</button>
 </form>
 
-<div>
-    <button onclick="topFunction()" id="myBtn" title="Go to top">&uarr;</button>
-</div>
 <script>
     $(document).ready(function () {
 
@@ -79,9 +76,5 @@
             'height=' + h + ',width=' + w + ',top=' + TopPosition + ',left=' + LeftPosition + ',scrollbars=' + scroll + ',resizable'
         popupWindow = window.open(url, winName, settings)
     }
-</script>
-<script async defer src="https://apis.google.com/js/api.js"
-        onload="this.onload=function(){};handleClientLoad()"
-        onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
 <% include partials/footer %>
