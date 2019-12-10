@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Appointment</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+    <!--ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body class="text-center">
+<br>
+<h4>Delete appointment!</h4>
+<br>
+
+Date: <input type="date" id="date" name="date"><br> <br>
+Start time: <input type="time" id="startTime" name="startTime"><br> <br>
+End time: <input type="time" id="endTime" name="endTime"><br> <br>
+Description: <input type="text" id="description" name="description">
+<br><br>
+<button id="deleteAppointmentBtn" class="btn btn-lg btn-info">Delete appointment!</button>
+<br><br>
+<div id="deleteAppointmentError"></div>
+<br>
+<script>
+    // user deletes appointment
+    $("#deleteAppointmentBtn").on("click", function () {
+        let date = $("#date").val();
+        let startTime = $("#startTime").val();
+        let endTime = $("#endTime").val();
+        let description = $("#description").val();
+
+        if (date == "") {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a date!");
+            return;
+        } else if (startTime == "") {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a start time!");
+            return;
+        } else if (endTime == "") {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a end time!");
+            return;
+        } else if (description == "") {
+            $("#deleteAppointmentError").attr("class", "text-danger");
+            $("#deleteAppointmentError").html("Please enter a description!");
+            return;
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/deleteAppointmentRequest",
+            dataType: "json",
+            data: {
+                "date": date,
+                "startTime": startTime,
+                "endTime": endTime,
+                "description": description
+            },
+            success: function (result, status) {
+                if (result == false) {
+                    $("#deleteAppointmentError").attr("class", "text-danger");
+                    $("#deleteAppointmentError").html("Sorry, your appointment was not deleted from your schedule.");
+                } else {
+                    $("#deleteAppointmentError").attr("class", "text-success");
+                    $("#deleteAppointmentError").html("Appointment was deleted from your schedule successfully.");
+                }
+            }
+
+        });//ajax
+    });//signUpBtn
+</script>
+</body>
+</html>

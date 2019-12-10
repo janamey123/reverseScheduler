@@ -156,6 +156,18 @@ app.get("/getUsersGroups", async function (req, res) {
     res.send(groups);
 });
 
+app.get("/addGroup", isAuthenticated, function (req, res) {
+    res.render("addGroup");
+});
+
+app.get("/addMemberToGroup", isAuthenticated, function (req, res) {
+    res.render("addMemberToGroup");
+});
+
+app.get("/deleteGroup", isAuthenticated, function (req, res) {
+    res.render("deleteGroup");
+});
+
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
