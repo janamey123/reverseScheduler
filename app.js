@@ -14,7 +14,6 @@ app.use(session({
 app.use(express.urlencoded({extended: true}));
 
 // routes
-
 app.get("/", async function (req, res) {
     let groups = await getGroups();
     res.render("index", {"groups": groups});
