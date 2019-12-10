@@ -14,6 +14,7 @@ app.use(session({
 app.use(express.urlencoded({extended: true}));
 
 // routes
+
 app.get("/", async function (req, res) {
     let groups = await getGroups();
     res.render("index", {"groups": groups});
@@ -130,7 +131,9 @@ app.get("/userSearchSection", async function (req, res) {
     res.send(searchResult);
 });
 
+
 // functions
+
 function getUser(query) {
     // connect to database here to check if user already exists
     let username = query.username;
