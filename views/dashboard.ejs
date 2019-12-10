@@ -9,7 +9,10 @@
 <h4>My Schedule</h4>
 
 <div id="h"></div>
+<br>
 <div id="events"></div>
+<br><br>
+<div id="message"></div>
 
 <br><br>
 
@@ -41,18 +44,25 @@
                     let str = "";
                     let date = "";
                     let key = "";
+                    $("#message").hide();
 
-                    for (let i = 0; i < result.length; i++) {
-                        $("#events").append(`<div name="event" id="${i}">`);
-                    }
+                    if (result.length == 0) {
+                        $("#message").attr("class", "text-info");
+                        $("#message").html("You currently don't have any appointments.")
+                        $("#message").show();
+                    } else {
+                        for (let i = 0; i < result.length; i++) {
+                            $("#events").append(`<div name="event" id="${i}">`);
+                        }
 
-                    $("#h").html("Description - date - start time - end time");
+                        $("#h").html("Description - date - start time - end time");
 
-                    for (let i = 0; i < result.length; i++) {
-                        str = result[i].date;
-                        date = str.substring(0, 10);
-                        key = "\#" + i;
-                        $(key).html(result[i].description + " - " + date + " - " + result[i].startTime + " - " + result[i].endTime);
+                        for (let i = 0; i < result.length; i++) {
+                            str = result[i].date;
+                            date = str.substring(0, 10);
+                            key = "\#" + i;
+                            $(key).html(result[i].description + " - " + date + " - " + result[i].startTime + " - " + result[i].endTime);
+                        }
                     }
                 }
             });//ajax
