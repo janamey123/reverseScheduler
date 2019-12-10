@@ -8,8 +8,8 @@ Last name: <input type="text" id="s_lastName" name="s_lastName">
 <br><br>
 Password: <input type="text" id="s_password" name="s_password">
 <br><br>
-<button id="signingUpBtn" class="btn btn-lg btn-info"> Sign up </button>
-<button id="loginBtn" class="btn btn-lg btn-info"> Log in </button>
+<button id="signingUpBtn" class="btn btn-lg btn-info"> Sign up</button>
+<button id="loginBtn" class="btn btn-lg btn-info"> Log in</button>
 <br><br>
 <div id="signUpError"></div>
 <script>
@@ -25,11 +25,11 @@ Password: <input type="text" id="s_password" name="s_password">
         let lastName = $("#s_lastName").val();
         let password = $("#s_password").val();
 
-        if (username == "" ) {
+        if (username == "") {
             $("#signUpError").attr("class", "text-danger");
             $("#signUpError").html("Please enter a username!");
             return;
-        } else if (firstName =="") {
+        } else if (firstName == "") {
             $("#signUpError").attr("class", "text-danger");
             $("#signUpError").html("Please enter a first name!");
             return;

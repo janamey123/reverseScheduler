@@ -34,11 +34,11 @@ Description: <input type="text" id="description" name="description">
         let endTime = $("#endTime").val();
         let description = $("#description").val();
 
-        if (date == "" ) {
+        if (date == "") {
             $("#addAppointmentError").attr("class", "text-danger");
             $("#addAppointmentError").html("Please enter a date!");
             return;
-        } else if (startTime =="") {
+        } else if (startTime == "") {
             $("#addAppointmentError").attr("class", "text-danger");
             $("#addAppointmentError").html("Please enter a start time!");
             return;

@@ -98,6 +98,12 @@ app.get("/deleteAppointmentRequest", async function (req, res) {
     }
 });
 
+app.get("/getUsersEvents", async function (req, res) {
+    let scheduleId = await getScheduleId(req.query.username);
+    console.log("name: " + req.query.username);
+    //let id = scheduleId[0].scheduleId;
+});
+
 app.get("/groups", isAuthenticated, function (req, res) {
     res.render("groups");
 });

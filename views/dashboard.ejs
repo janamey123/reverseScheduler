@@ -6,8 +6,9 @@
     <a href="/groups">My groups</a>
 </div>
 <br><br>
-<h4>My Scheduler</h4>
-<iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=2&amp;bgcolor=%23ffffff&amp;ctz=America%2FLos_Angeles&amp;src=Y3N1bWIuZWR1X2FhcHVzM2w3cmxrZDhvYjNuaDk3aGI1MzBnQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&amp;color=%235A9A08&amp;showPrint=0&amp;showTitle=0&amp;showCalendars=0" style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+<h4>My Schedule</h4>
+
+
 <br><br>
 
 <p><a href="/addAppointment"
@@ -25,6 +26,14 @@
     <button onclick="topFunction()" id="myBtn" title="Go to top">&uarr;</button>
 </div>
 <script>
+    $(document).ready(function () {
+
+        function getUsersEvents(){
+
+        }
+
+    });
+
     var popupWindow = null;
 
     function centeredPopup(url, winName, w, h, scroll) {
@@ -34,5 +43,9 @@
             'height=' + h + ',width=' + w + ',top=' + TopPosition + ',left=' + LeftPosition + ',scrollbars=' + scroll + ',resizable'
         popupWindow = window.open(url, winName, settings)
     }
+</script>
+<script async defer src="https://apis.google.com/js/api.js"
+        onload="this.onload=function(){};handleClientLoad()"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
 <% include partials/footer %>
