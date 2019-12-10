@@ -98,6 +98,44 @@ app.get("/deleteAppointmentRequest", async function (req, res) {
     }
 });
 
+app.get("/editAppointment", isAuthenticated, function (req, res) {
+    res.render("editAppointment");
+});
+
+app.get("/getAppointmentRequest", async function (req, res) {
+    let scheduleId = await getScheduleId(req.session.username);
+    let id = scheduleId[0].scheduleId;
+
+    if (id == undefined) {
+        res.send(false);
+    } else {
+        try {
+            let appointment = await getAppointment(req.query, id);
+            res.send(appointment);
+        } catch (e) {
+            res.send(false);
+        }
+
+    }
+});
+
+app.get("/changeAppointmentRequest", async function (req, res) {
+    let scheduleId = await getScheduleId(req.session.username);
+    let id = scheduleId[0].scheduleId;
+
+    if (id == undefined || req.query.appointmentId == 0) {
+        res.send(false);
+    } else {
+        try {
+            let appointment = await changeAppointment(req.query, id);
+            res.send(true);
+        } catch (e) {
+            res.send(false);
+        }
+
+    }
+});
+
 app.get("/getUsersEvents", async function (req, res) {
     let username = req.session.username;
     let scheduleId = await getScheduleId(username);
@@ -409,9 +447,62 @@ function getEvents(scheduleId){
             });
         });//connect
     });//promise
-
-
 }//getEvents
+
+function getAppointment(query, id){
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let startTime = query.startTime + ":00";
+            let endTime = query.endTime + ":00";
+            let params = [id, query.description, query.date, startTime, endTime];
+
+            let sql = `SELECT *
+                       FROM appointment a
+                       WHERE a.scheduleId = ? 
+                       AND description = ? 
+                       AND date = ? 
+                       AND startTime = ? 
+                       AND endTime = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getAppointment
+
+function changeAppointment(query, id) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let startTime = query.startTime + ":00";
+            let endTime = query.endTime + ":00";
+            let params = [query.description, query.date, startTime, endTime, id, query.appointmentId];
+
+            let sql = `UPDATE appointment a 
+                       SET a.description = ?, a.date = ?, a.startTime = ?, a.endTime =  ? 
+                       WHERE a.scheduleId = ? 
+                       AND a.appointmentId = ?;
+                       `;
+            console.log("in change sgdf");
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}
 
 function dbConnection() {
     let conn = mysql.createConnection({

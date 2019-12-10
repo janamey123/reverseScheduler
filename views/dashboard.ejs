@@ -20,7 +20,8 @@
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Add new appointment!</a></p>
 <p><a href="/deleteAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete an appointment!</a></p>
-
+<p><a href="/editAppointment"
+      onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Edit an appointment!</a></p>
 <br><br>
 
 <form action="/logout">
@@ -67,7 +68,7 @@
                 }
             });//ajax
         }//getUsersEvents
-    });
+    });//ready
 
     var popupWindow = null;
 
