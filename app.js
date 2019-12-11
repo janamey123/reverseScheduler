@@ -239,6 +239,28 @@ app.get("/deleteGroupRequest", async function (req, res) {
     }
 });
 
+app.get("/getAvailability", async function (req, res) {
+
+
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    try {
+        console.log("groupID " + group[0].groupId);
+
+        let delGroup = await deleteGroup(group[0].groupId);
+        let delMemberConn = await deleteGroupMemberConnection(group[0].groupId);
+
+        if (delGroup.affectedRows == 0) {
+            res.send(success);
+        } else {
+            success = true;
+            res.send(success);
+        }
+    } catch (e) {
+        res.send(success);
+    }
+});
+
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });

@@ -109,7 +109,6 @@ Group name:
                 "groupName": groupName
             },
             success: function (result, status) {
-/**
                 for (let i = 0; i < result.length; i++) {
                     $("#resultAvailability").append(`<div name="resultAvailability" id="${i}"></div>`);
                 }
@@ -120,7 +119,7 @@ Group name:
                     let key = "\#" + i;
                     $(key).html(result[i].firstName + " - " + result[i].username + " - " + result[i].groupName);
                 }
- */
+
             }
         });//ajax
 
