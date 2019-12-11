@@ -307,11 +307,11 @@ function deleteAppointment(body, scheduleId) {
             let params = [scheduleId, body.description, body.date, startTime, endTime];
 
             let sql = `DELETE
-                       FROM \`appointment\`
+                       FROM appointment
                        WHERE scheduleId = ?
                        AND description = ? 
-                       AND date = ?
-                       AND startTime = ?
+                       AND date = ? 
+                       AND startTime = ? 
                        AND endTime = ?;
                        `;
 
@@ -322,7 +322,7 @@ function deleteAppointment(body, scheduleId) {
             });
         });//connect
     });//promise
-}//insertAppointment
+}//deleteAppointment
 
 function getScheduleId(username) {
     let conn = dbConnection();
@@ -480,7 +480,8 @@ function getEvents(scheduleId) {
 
             let sql = `SELECT *
                        FROM \`appointment\` a
-                       WHERE a.scheduleId = ?;
+                       WHERE a.scheduleId = ?
+                       ORDER BY a.date, a.startTime;
                        `;
 
             conn.query(sql, [scheduleId], function (err, rows, fields) {
