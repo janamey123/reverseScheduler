@@ -29,17 +29,18 @@
             <div id="et"></div>
         </td>
     </tr>
+
 </table>
 <br><br>
 <div id="message"></div>
 
 <br><br>
 
-<p><a href="/addAppointment"
+<p><a id="add" href="/addAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Add new appointment!</a></p>
-<p><a href="/deleteAppointment"
+<p><a id="delete" href="/deleteAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete an appointment!</a></p>
-<p><a href="/editAppointment"
+<p><a id="edit" href="/editAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Edit an appointment!</a></p>
 <br><br>
 
@@ -73,14 +74,12 @@
                         $("#message").show();
                     } else {
                         for (let i = 0; i < result.length; i++) {
-                            $("#desc").append(`<div name="desc" id="desc${i}">`);
+                            $("#desc").append(`<div name="desc" id="desc${i}"><br>`);
                             $("#dt").append(`<div name="dt" id="dt${i}">`);
                             $("#st").append(`<div name="st" id="st${i}">`);
                             $("#et").append(`<div name="et" id="et${i}">`);
-
                         }
 
-                        $("#h").html("Description - date - start time - end time");
 
                         for (let i = 0; i < result.length; i++) {
                             str = result[i].date;
@@ -91,10 +90,9 @@
                             etKey = "\#et" + i;
 
                             $(descKey).html(result[i].description);
-                            $(dtKey).html(new Date(date).toDateString());
-                            $(stKey).html(result[i].startTime);
-                            $(etKey).html(result[i].endTime);
-
+                            $(dtKey).html(date);
+                            $(stKey).html(convertTime(result[i].startTime));
+                            $(etKey).html(convertTime(result[i].endTime));
                         }
                     }
                 }
@@ -112,7 +110,7 @@
         popupWindow = window.open(url, winName, settings)
     }
 
-    function convertTime(time){
+    function convertTime(time) {
 
         time = time.split(':'); // convert to array
 
@@ -125,11 +123,11 @@
         var timeValue;
 
         if (hours > 0 && hours <= 12) {
-          timeValue= "" + hours;
+            timeValue = "" + hours;
         } else if (hours > 12) {
-          timeValue= "" + (hours - 12);
+            timeValue = "" + (hours - 12);
         } else if (hours == 0) {
-          timeValue= "12";
+            timeValue = "12";
         }
 
         timeValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;  // get minutes

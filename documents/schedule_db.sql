@@ -42,16 +42,6 @@ CREATE TABLE `groupmember` (
   KEY `userId` (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-ALTER TABLE `groupmember`
-ADD CONSTRAINT `FK_group`
-FOREIGN KEY (`groupId`) REFERENCES `group` (`groupId`)
-ON UPDATE CASCADE;
-
-ALTER TABLE `groupmember`
-ADD CONSTRAINT `FK_user`
-FOREIGN KEY (`userId`) REFERENCES `user` (`userId`)
-ON UPDATE CASCADE;
-
 INSERT INTO `groupmember` (`groupId`, `userId`) VALUES
 (1,	1),
 (1,	2),

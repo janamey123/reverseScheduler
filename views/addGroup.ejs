@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Delete Appointment</title>
+    <title>Create a new group</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
@@ -14,61 +14,40 @@
 </head>
 <body class="text-center">
 <br>
-<h4>Delete appointment!</h4>
+<h4>Create a new group!</h4>
 <br>
 
-Date: <input type="date" id="date" name="date"><br> <br>
-Start time: <input type="time" id="startTime" name="startTime"><br> <br>
-End time: <input type="time" id="endTime" name="endTime"><br> <br>
-Description: <input type="text" id="description" name="description">
+Group name: <input type="text" id="groupName" name="groupName"><br> <br>
+
 <br><br>
-<button id="deleteAppointmentBtn" class="btn btn-lg btn-info">Delete appointment!</button>
+<button id="addGroupBtn" class="btn btn-lg btn-info">Add group!</button>
 <br><br>
-<div id="deleteAppointmentError"></div>
+<div id="addGroupError"></div>
 <br>
 <script>
-    // user deletes appointment
-    $("#deleteAppointmentBtn").on("click", function () {
-        let date = $("#date").val();
-        let startTime = $("#startTime").val();
-        let endTime = $("#endTime").val();
-        let description = $("#description").val();
+    $("#addGroupBtn").on("click", function () {
+        let groupName = $("#groupName").val();
 
-        if (date == "") {
-            $("#deleteAppointmentError").attr("class", "text-danger");
-            $("#deleteAppointmentError").html("Please enter a date!");
-            return;
-        } else if (startTime == "") {
-            $("#deleteAppointmentError").attr("class", "text-danger");
-            $("#deleteAppointmentError").html("Please enter a start time!");
-            return;
-        } else if (endTime == "") {
-            $("#deleteAppointmentError").attr("class", "text-danger");
-            $("#deleteAppointmentError").html("Please enter a end time!");
-            return;
-        } else if (description == "") {
-            $("#deleteAppointmentError").attr("class", "text-danger");
-            $("#deleteAppointmentError").html("Please enter a description!");
+        if (groupName == "") {
+            $("#addGroupError").attr("class", "text-danger");
+            $("#addGroupError").html("Please enter a group name!");
             return;
         }
 
         $.ajax({
             method: "GET",
-            url: "/deleteAppointmentRequest",
+            url: "/addGroupRequest",
             dataType: "json",
             data: {
-                "date": date,
-                "startTime": startTime,
-                "endTime": endTime,
-                "description": description
+                "groupName": groupName
             },
             success: function (result, status) {
                 if (result == false) {
-                    $("#deleteAppointmentError").attr("class", "text-danger");
-                    $("#deleteAppointmentError").html("Sorry, your appointment was not deleted from your schedule.");
+                    $("#addGroupError").attr("class", "text-danger");
+                    $("#addGroupError").html("Sorry, group could not be added.");
                 } else {
-                    $("#deleteAppointmentError").attr("class", "text-success");
-                    $("#deleteAppointmentError").html("Appointment was deleted from your schedule successfully.");
+                    $("#addGroupError").attr("class", "text-success");
+                    $("#addGroupError").html("Group was created successfully.");
                 }
             }
 

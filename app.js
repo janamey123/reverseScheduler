@@ -160,12 +160,81 @@ app.get("/addGroup", isAuthenticated, function (req, res) {
     res.render("addGroup");
 });
 
-app.get("/addMemberToGroup", isAuthenticated, function (req, res) {
-    res.render("addMemberToGroup");
+app.get("/addGroupRequest", async function (req, res) {
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    try {
+        if (group[0].groupname == req.query.groupName) {
+            res.send(success);
+        }
+    } catch (e) {
+        let insert = await insertNewGroup(req.query);
+        if (insert.affectedRows == 0) {
+            res.send(success);
+        } else {
+            let user = await getUser(req.session.username);
+            let group = await getSingleGroup(req.query);
+
+            let addUser = await addGroupMember(group[0].groupId, user[0].userId);
+            if (addUser.affectedRows == 0) {
+                res.send(success);
+            }
+            success = true;
+            res.send(success);
+        }
+    }
 });
 
-app.get("/deleteGroup", isAuthenticated, function (req, res) {
-    res.render("deleteGroup");
+app.get("/addMemberToGroup", isAuthenticated, async function (req, res) {
+    let groups = await getGroups();
+    res.render("addMemberToGroup", {"groups": groups});
+});
+
+app.get("/addNewMemberRequest", async function (req, res) {
+    let user = await getUser(req.query.member);
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    let userId = 0;
+
+    try {
+        userId = user[0].userId;
+    } catch (e) {
+        res.send(success);
+        return;
+    }
+
+    let addUser = await addGroupMember(group[0].groupId, userId);
+    if (addUser.affectedRows == 0) {
+        res.send(success);
+    } else {
+        success = true;
+        res.send(success);
+    }
+});
+
+app.get("/deleteGroup", isAuthenticated, async function (req, res) {
+    let groups = await getGroups();
+    res.render("deleteGroup", {"groups": groups});
+});
+
+app.get("/deleteGroupRequest", async function (req, res) {
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    try {
+        console.log("groupID " + group[0].groupId);
+
+        let delGroup = await deleteGroup(group[0].groupId);
+        let delMemberConn = await deleteGroupMemberConnection(group[0].groupId);
+
+        if (delGroup.affectedRows == 0) {
+            res.send(success);
+        } else {
+            success = true;
+            res.send(success);
+        }
+    } catch (e) {
+        res.send(success);
+    }
 });
 
 app.get("/signUp", function (req, res) {
@@ -173,7 +242,7 @@ app.get("/signUp", function (req, res) {
 });
 
 app.get("/signingUpRequest", async function (req, res) {
-    let user = await getUser(req.query);
+    let user = await getUser(req.query.username);
     let success = false;
     try {
         if (user[0].username == req.query.username) {
@@ -199,11 +268,10 @@ app.get("/userSearchSection", async function (req, res) {
 
 // functions
 
-function getUser(query) {
+function getUser(username) {
     // connect to database here to check if user already exists
-    let username = query.username;
-
     let conn = dbConnection();
+
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
@@ -249,7 +317,7 @@ function insertNewUser(query) {
 }//insertNewUser
 
 async function createNewSchedule(query) {
-    let user = await getUser(query);
+    let user = await getUser(query.username);
     let userId = user[0].userId;
 
     let conn = dbConnection();
@@ -306,11 +374,11 @@ function deleteAppointment(body, scheduleId) {
             let params = [scheduleId, body.description, body.date, startTime, endTime];
 
             let sql = `DELETE
-                       FROM \`appointment\`
+                       FROM appointment
                        WHERE scheduleId = ?
                        AND description = ? 
-                       AND date = ?
-                       AND startTime = ?
+                       AND date = ? 
+                       AND startTime = ? 
                        AND endTime = ?;
                        `;
 
@@ -321,7 +389,7 @@ function deleteAppointment(body, scheduleId) {
             });
         });//connect
     });//promise
-}//insertAppointment
+}//deleteAppointment
 
 function getScheduleId(username) {
     let conn = dbConnection();
@@ -352,7 +420,7 @@ function getGroups() {
         conn.connect(function (err) {
             if (err) throw err;
 
-            let sql = `SELECT groupName 
+            let sql = `SELECT groupName, groupId 
                        FROM \`group\`;
                        `;
 
@@ -375,7 +443,7 @@ function getUsersGroups(username) {
             let sql = `SELECT g.groupname, u.username
                        FROM \`user\` u 
                        JOIN \`groupmember\` m ON u.userId = m.userId 
-                       JOIN \`group\` g ON m.groupId = g.groupId
+                       RIGHT JOIN \`group\` g ON m.groupId = g.groupId
                        ORDER BY g.groupname, u.username;;
                        `;
 
@@ -387,6 +455,115 @@ function getUsersGroups(username) {
         });//connect
     });//promise
 }//getUsersGroups
+
+function getSingleGroup(query) {
+    // connect to database here to check if group name already exists
+    let groupname = query.groupName;
+
+    let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected! Get group");
+
+            let params = [groupname];
+
+            let sql = `SELECT *
+                       FROM \`group\` g
+                       WHERE g.groupname = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getSingleGroup
+
+function deleteGroup(groupId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+
+            let sql = `DELETE FROM \`group\` 
+                       WHERE groupId = ?;
+                       `;
+
+            conn.query(sql, [groupId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleteGroup
+
+function deleteGroupMemberConnection(groupId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+
+            let sql = `DELETE FROM \`groupmember\` 
+                       WHERE groupId = ?;
+                       `;
+
+            conn.query(sql, [groupId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleteGroupMemberConnection
+
+function addGroupMember(groupId, userId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+            console.log("Connected! Insert appointment");
+
+            let sql = `INSERT INTO \`groupmember\`
+                       (groupId, userId)
+                       VALUES (?, ?)
+                       `;
+
+            let params = [groupId, userId];
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//addGroupMember
+
+function insertNewGroup(query) {
+    let groupname = query.groupName;
+
+    let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected! Insert user");
+
+            let params = [groupname];
+            let sql = 'INSERT INTO \`group\` (groupname) VALUES (?);';
+
+            conn.query(sql, params, function (err, result) {
+                if (err) throw err;
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//insertNewUser
 
 function getSearchResult(query) {
     let searchName = query.searchName;
@@ -479,7 +656,8 @@ function getEvents(scheduleId) {
 
             let sql = `SELECT *
                        FROM \`appointment\` a
-                       WHERE a.scheduleId = ?;
+                       WHERE a.scheduleId = ?
+                       ORDER BY a.date, a.startTime;
                        `;
 
             conn.query(sql, [scheduleId], function (err, rows, fields) {
