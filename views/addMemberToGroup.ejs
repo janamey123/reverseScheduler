@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Delete Appointment</title>
+    <title>Add a new member to a group</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
@@ -18,12 +18,13 @@
 <br>
 
 Group name:
-<select name="seelectedGroup" id="seelectedGroup">
+<select name="selectedGroup" id="seelectedGroup">
     <option value=""> Select One</option>
     <% groups.forEach(function(i){ %>
         <option> <%= i.groupName %>  </option>
     <% }); %>
-</select><br> <br>
+</select>
+<br> <br>
 New member: <input type="text" id="member" name="member"><br> <br>
 
 <br><br>
@@ -34,7 +35,7 @@ New member: <input type="text" id="member" name="member"><br> <br>
 <script>
     // user deletes appointment
     $("#addMemberBtn").on("click", function () {
-        let searchGroup = $("#seelectedGroup").val();
+        let searchGroup = $("#selectedGroup").val();
         let member = $("#member").val();
 
         if (searchGroup == "" || searchGroup == "Select one") {

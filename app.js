@@ -213,8 +213,29 @@ app.get("/addNewMemberRequest", async function (req, res) {
     }
 });
 
-app.get("/deleteGroup", isAuthenticated, function (req, res) {
-    res.render("deleteGroup");
+app.get("/deleteGroup", isAuthenticated, async function (req, res) {
+    let groups = await getGroups();
+    res.render("deleteGroup", {"groups": groups});
+});
+
+app.get("/deleteGroupRequest", async function (req, res) {
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    try {
+        console.log("groupID " + group[0].groupId);
+
+        let delGroup = await deleteGroup(group[0].groupId);
+        let delMemberConn = await deleteGroupMemberConnection(group[0].groupId);
+
+        if (delGroup.affectedRows == 0) {
+            res.send(success);
+        } else {
+            success = true;
+            res.send(success);
+        }
+    } catch (e) {
+        res.send(success);
+    }
 });
 
 app.get("/signUp", function (req, res) {
@@ -460,6 +481,46 @@ function getSingleGroup(query) {
         });//connect
     });//promise
 }//getSingleGroup
+
+function deleteGroup(groupId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+
+            let sql = `DELETE FROM \`group\` 
+                       WHERE groupId = ?;
+                       `;
+
+            conn.query(sql, [groupId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleteGroup
+
+function deleteGroupMemberConnection(groupId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+
+            let sql = `DELETE FROM \`groupmember\` 
+                       WHERE groupId = ?;
+                       `;
+
+            conn.query(sql, [groupId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleteGroupMemberConnection
 
 function addGroupMember(groupId, userId) {
     let conn = dbConnection();
