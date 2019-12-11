@@ -28,15 +28,31 @@
 
 <br><br>
 
-<p><a href="/addGroup"
+<p><a class="btn btn-outline-success" href="/addGroup"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Add new Group!</a></p>
-<p><a href="/addMemberToGroup"
+<p><a class="btn btn-outline-success" href="/addMemberToGroup"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Add member to a group!</a></p>
-<p><a href="/deleteGroup"
+<p><a class="btn btn-outline-danger" href="/deleteGroup"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete a group!</a></p>
 <br><br>
 
+<h3>Show availability!</h3>
+
 <br><br>
+Group name:
+<select name="allGroups" id="allGroups">
+    <option value=""> Select One</option>
+    <% groups.forEach(function(i){ %>
+        <option> <%= i.groupName %>  </option>
+    <% }); %>
+</select>
+<br><br>
+<button id="availabilityBtn" class="btn btn-lg btn-info">Get availability!</button>
+<br><br>
+<div id="resultAvailability"></div>
+<br><br>
+<div id="availabilityError"></div>
+
 <script>
     $(document).ready(function () {
 
@@ -75,6 +91,40 @@
             });//ajax
         }//getUsersEvents
     });//ready
+
+    $("#availabilityBtn").on("click", function () {
+        let groupName = $("#allGroups").val();
+
+        if (groupName == "" || groupName == "Select one") {
+            $("#availabilityError").attr("class", "text-danger");
+            $("#availabilityError").html("Please select a group.");
+            return;
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/getAvailability",
+            dataType: "json",
+            data: {
+                "groupName": groupName
+            },
+            success: function (result, status) {
+/**
+                for (let i = 0; i < result.length; i++) {
+                    $("#resultAvailability").append(`<div name="resultAvailability" id="${i}"></div>`);
+                }
+
+                $("#h").html("Result:");
+
+                for (let i = 0; i < result.length; i++) {
+                    let key = "\#" + i;
+                    $(key).html(result[i].firstName + " - " + result[i].username + " - " + result[i].groupName);
+                }
+ */
+            }
+        });//ajax
+
+    });
 
     var popupWindow = null;
 

@@ -146,8 +146,9 @@ app.get("/getUsersEvents", async function (req, res) {
     res.send(events);
 });
 
-app.get("/groups", isAuthenticated, function (req, res) {
-    res.render("groups");
+app.get("/groups", isAuthenticated, async function (req, res) {
+    let groups = await getGroups();
+    res.render("groups", {"groups": groups});
 });
 
 app.get("/getUsersGroups", async function (req, res) {
