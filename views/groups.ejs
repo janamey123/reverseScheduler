@@ -49,6 +49,8 @@ Group name:
 <br><br>
 <button id="availabilityBtn" class="btn btn-lg btn-info">Get availability!</button>
 <br><br>
+<div id="h"></div>
+<br>
 <div id="resultAvailability"></div>
 <br><br>
 <div id="availabilityError"></div>
@@ -95,9 +97,11 @@ Group name:
     $("#availabilityBtn").on("click", function () {
         let groupName = $("#allGroups").val();
 
+        $("#availabilityError").hide();
         if (groupName == "" || groupName == "Select one") {
             $("#availabilityError").attr("class", "text-danger");
             $("#availabilityError").html("Please select a group.");
+            $("#availabilityError").show();
             return;
         }
 
@@ -109,17 +113,21 @@ Group name:
                 "groupName": groupName
             },
             success: function (result, status) {
+                let str = "";
+                let date = "";
+                $("#resultAvailability").empty();
                 for (let i = 0; i < result.length; i++) {
                     $("#resultAvailability").append(`<div name="resultAvailability" id="${i}"></div>`);
                 }
 
-                $("#h").html("Result:");
+                $("#h").html("Username - Description - Date - Start time - End time");
 
                 for (let i = 0; i < result.length; i++) {
+                    str = result[i].date;
+                    date = str.substring(0, 10);
                     let key = "\#" + i;
-                    $(key).html(result[i].username + " - " + result[i].description + " - " + result[i].date + " - " + result[i].startTime + " - " + result[i].endTime);
+                    $(key).html(result[i].username + " - " + result[i].description + " - " + date + " - " + result[i].startTime + " - " + result[i].endTime);
                 }
-
             }
         });//ajax
 
