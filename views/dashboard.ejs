@@ -6,20 +6,100 @@
     <a href="/groups">My groups</a>
 </div>
 <br><br>
-<h4>My Scheduler</h4>
-<iframe src="https://calendar.google.com/calendar/embed?src=csumb.edu_aapus3l7rlkd8ob3nh97hb530g%40group.calendar.google.com&ctz=America%2FLos_Angeles"
-        style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+<h4>My Schedule</h4>
+
+<table class="centered">
+    <tr id="table-header">
+        <td><strong>Description</strong></td>
+        <td><strong>Date</strong></td>
+        <td><strong>Start time</strong></td>
+        <td><strong>End time</strong></td>
+    </tr>
+    <tr class="table-row">
+        <td>
+            <div id="desc"></div>
+        </td>
+        <td>
+            <div id="dt"></div>
+        </td>
+        <td>
+            <div id="st"></div>
+        </td>
+        <td>
+            <div id="et"></div>
+        </td>
+    </tr>
+
+</table>
+<br><br>
+<div id="message"></div>
+
 <br><br>
 
-<p><a href="/addAppointment"
+<p><a id="add" href="/addAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Add new appointment!</a></p>
-<p><a href="/deleteAppointment"
+<p><a id="delete" href="/deleteAppointment"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete an appointment!</a></p>
+<p><a id="edit" href="/editAppointment"
+      onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Edit an appointment!</a></p>
+<br><br>
 
-<div>
-    <button onclick="topFunction()" id="myBtn" title="Go to top">&uarr;</button>
-</div>
+<form action="/logout">
+    <button class="btn btn-lg btn-danger">Logout</button>
+</form>
+
 <script>
+    $(document).ready(function () {
+
+        getUsersEvents();
+
+        function getUsersEvents() {
+            $.ajax({
+                method: "GET",
+                url: "/getUsersEvents",
+                dataType: "json",
+                success: function (result, status) {
+                    let str = "";
+                    let date = "";
+                    let descKey = "";
+                    let dtKey = "";
+                    let stKey = "";
+                    let etKey = "";
+
+                    $("#message").hide();
+
+                    if (result.length == 0) {
+                        $("#message").attr("class", "text-info");
+                        $("#message").html("You currently don't have any appointments.")
+                        $("#message").show();
+                    } else {
+                        for (let i = 0; i < result.length; i++) {
+                            $("#desc").append(`<div name="desc" id="desc${i}"><br>`);
+                            $("#dt").append(`<div name="dt" id="dt${i}">`);
+                            $("#st").append(`<div name="st" id="st${i}">`);
+                            $("#et").append(`<div name="et" id="et${i}">`);
+                        }
+
+
+                        for (let i = 0; i < result.length; i++) {
+                            str = result[i].date;
+                            date = str.substring(0, 10);
+                            descKey = "\#desc" + i;
+                            dtKey = "\#dt" + i;
+                            stKey = "\#st" + i;
+                            etKey = "\#et" + i;
+
+                            $(descKey).html(result[i].description);
+                            $(dtKey).html(date);
+                            $(stKey).html(convertTime(result[i].startTime));
+                            $(etKey).html(convertTime(result[i].endTime));
+                        }
+                    }
+                }
+            });//ajax
+        }//getUsersEvents
+    });//ready
+
     var popupWindow = null;
 
     function centeredPopup(url, winName, w, h, scroll) {
@@ -28,6 +108,33 @@
         settings =
             'height=' + h + ',width=' + w + ',top=' + TopPosition + ',left=' + LeftPosition + ',scrollbars=' + scroll + ',resizable'
         popupWindow = window.open(url, winName, settings)
+    }
+
+    function convertTime(time) {
+
+        time = time.split(':'); // convert to array
+
+        // fetch
+        var hours = Number(time[0]);
+        var minutes = Number(time[1]);
+        var seconds = Number(time[2]);
+
+        // calculate
+        var timeValue;
+
+        if (hours > 0 && hours <= 12) {
+            timeValue = "" + hours;
+        } else if (hours > 12) {
+            timeValue = "" + (hours - 12);
+        } else if (hours == 0) {
+            timeValue = "12";
+        }
+
+        timeValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;  // get minutes
+        timeValue += (seconds < 10) ? ":0" + seconds : ":" + seconds;  // get seconds
+        timeValue += (hours >= 12) ? " P.M." : " A.M.";  // get AM/PM
+
+        return timeValue;
     }
 </script>
 <% include partials/footer %>

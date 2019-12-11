@@ -1,37 +1,70 @@
 const express = require("express");
 const mysql = require("mysql");
 const app = express();
+const session = require('express-session');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 app.set("view engine", "ejs");
 app.use(express.static("public"));
-//app.use('/', loginRouter );
+app.use(session({
+    secret: "top secret!",
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(express.urlencoded({extended: true}));
 
 // routes
+
 app.get("/", async function (req, res) {
     let groups = await getGroups();
-    res.render("index", {title: 'login', "groups": groups});
-});
-app.post("/", function (req, res) {
-    // TODO: do something to login
-
-    //Return success or failure
-    res.json({});
-});
-app.get("/dashboard", function (req, res) {
-    res.render("dashboard", {
-        title: 'Logged in Dashboard'
-    });
+    res.render("index", {"groups": groups});
 });
 
-app.get("/account", function (req, res) {
+app.post("/", async function (req, res) {
+    let username = req.body.username;
+    let password = req.body.password;
+    let hashedPwd = "";
+    let userMatch = false;
+
+    let result = await checkUsername(username);
+
+    if (result.length > 0) {
+        hashedPwd = result[0].password;
+        if (result[0].username == username) {
+            userMatch = true;
+        }
+    }
+    let passwordMatch = await checkPassword(password, hashedPwd);
+
+    if (userMatch && passwordMatch) {
+        req.session.authenticated = true;
+        req.session.username = username;
+        res.send(true);
+    } else {
+        let groups = await getGroups();
+        res.send(false);
+    }
+});
+
+app.get("/dashboard", isAuthenticated, function (req, res) {
+    res.render("dashboard");
+});
+
+app.get("/logout", function (req, res) {
+    req.session.destroy();
+    res.redirect("/");
+});
+
+app.get("/account", isAuthenticated, function (req, res) {
     res.render("account");
 });
 
-app.get("/addAppointment", function (req, res) {
+app.get("/addAppointment", isAuthenticated, function (req, res) {
     res.render("addAppointment");
 });
 
 app.get("/addAppointmentRequest", async function (req, res) {
-    let scheduleId = await getScheduleId(req.query.username);
+    let scheduleId = await getScheduleId(req.session.username);
     let id = scheduleId[0].scheduleId;
     let success = false;
 
@@ -44,12 +77,12 @@ app.get("/addAppointmentRequest", async function (req, res) {
     }
 });
 
-app.get("/deleteAppointment", function (req, res) {
+app.get("/deleteAppointment", isAuthenticated, function (req, res) {
     res.render("deleteAppointment");
 });
 
 app.get("/deleteAppointmentRequest", async function (req, res) {
-    let scheduleId = await getScheduleId(req.query.username);
+    let scheduleId = await getScheduleId(req.session.username);
     let id = scheduleId[0].scheduleId;
     let success = false;
 
@@ -66,23 +99,151 @@ app.get("/deleteAppointmentRequest", async function (req, res) {
     }
 });
 
-app.get("/groups", function (req, res) {
+app.get("/editAppointment", isAuthenticated, function (req, res) {
+    res.render("editAppointment");
+});
+
+app.get("/getAppointmentRequest", async function (req, res) {
+    let scheduleId = await getScheduleId(req.session.username);
+    let id = scheduleId[0].scheduleId;
+
+    if (id == undefined) {
+        res.send(false);
+    } else {
+        try {
+            let appointment = await getAppointment(req.query, id);
+            res.send(appointment);
+        } catch (e) {
+            res.send(false);
+        }
+
+    }
+});
+
+app.get("/changeAppointmentRequest", async function (req, res) {
+    let scheduleId = await getScheduleId(req.session.username);
+    let id = scheduleId[0].scheduleId;
+
+    if (id == undefined || req.query.appointmentId == 0) {
+        res.send(false);
+    } else {
+        try {
+            let appointment = await changeAppointment(req.query, id);
+            res.send(true);
+        } catch (e) {
+            res.send(false);
+        }
+
+    }
+});
+
+app.get("/getUsersEvents", async function (req, res) {
+    let username = req.session.username;
+    let scheduleId = await getScheduleId(username);
+    let id = scheduleId[0].scheduleId;
+
+    let events = await getEvents(id);
+    res.send(events);
+});
+
+app.get("/groups", isAuthenticated, function (req, res) {
     res.render("groups");
+});
+
+app.get("/getUsersGroups", async function (req, res) {
+    let username = req.session.username;
+    let groups = await getUsersGroups(username);
+
+    res.send(groups);
+});
+
+app.get("/addGroup", isAuthenticated, function (req, res) {
+    res.render("addGroup");
+});
+
+app.get("/addGroupRequest", async function (req, res) {
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    try {
+        if (group[0].groupname == req.query.groupName) {
+            res.send(success);
+        }
+    } catch (e) {
+        let insert = await insertNewGroup(req.query);
+        if (insert.affectedRows == 0) {
+            res.send(success);
+        } else {
+            let user = await getUser(req.session.username);
+            let group = await getSingleGroup(req.query);
+
+            let addUser = await addGroupMember(group[0].groupId, user[0].userId);
+            if (addUser.affectedRows == 0) {
+                res.send(success);
+            }
+            success = true;
+            res.send(success);
+        }
+    }
+});
+
+app.get("/addMemberToGroup", isAuthenticated, async function (req, res) {
+    let groups = await getGroups();
+    res.render("addMemberToGroup", {"groups": groups});
+});
+
+app.get("/addNewMemberRequest", async function (req, res) {
+    let user = await getUser(req.query.member);
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    let userId = 0;
+
+    try {
+        userId = user[0].userId;
+    } catch (e) {
+        res.send(success);
+        return;
+    }
+
+    let addUser = await addGroupMember(group[0].groupId, userId);
+    if (addUser.affectedRows == 0) {
+        res.send(success);
+    } else {
+        success = true;
+        res.send(success);
+    }
+});
+
+app.get("/deleteGroup", isAuthenticated, async function (req, res) {
+    let groups = await getGroups();
+    res.render("deleteGroup", {"groups": groups});
+});
+
+app.get("/deleteGroupRequest", async function (req, res) {
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    try {
+        console.log("groupID " + group[0].groupId);
+
+        let delGroup = await deleteGroup(group[0].groupId);
+        let delMemberConn = await deleteGroupMemberConnection(group[0].groupId);
+
+        if (delGroup.affectedRows == 0) {
+            res.send(success);
+        } else {
+            success = true;
+            res.send(success);
+        }
+    } catch (e) {
+        res.send(success);
+    }
 });
 
 app.get("/signUp", function (req, res) {
     res.render("signUp");
 });
 
-app.get("/loginRequest", async function (req, res) {
-    let user = await getUser(req.query);
-    let success = false;
-    console.log('loginRequest');
-    res.send(true);
-});
-
 app.get("/signingUpRequest", async function (req, res) {
-    let user = await getUser(req.query);
+    let user = await getUser(req.query.username);
     let success = false;
     try {
         if (user[0].username == req.query.username) {
@@ -90,8 +251,13 @@ app.get("/signingUpRequest", async function (req, res) {
         }
     } catch (e) {
         let insert = await insertNewUser(req.query);
-        success = true;
-        res.send(success);
+        if (insert.affectedRows == 0) {
+            res.send(success);
+        } else {
+            let schedule = await createNewSchedule(req.query);
+            success = true;
+            res.send(success);
+        }
     }
 });
 
@@ -100,12 +266,13 @@ app.get("/userSearchSection", async function (req, res) {
     res.send(searchResult);
 });
 
-// functions
-function getUser(query) {
-    // connect to database here to check if user already exists
-    let username = query.username;
 
+// functions
+
+function getUser(username) {
+    // connect to database here to check if user already exists
     let conn = dbConnection();
+
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
@@ -114,7 +281,7 @@ function getUser(query) {
             let params = [username];
 
             let sql = `SELECT *
-                       FROM user u
+                       FROM \`user\` u
                        WHERE u.username = ?;
                        `;
 
@@ -131,6 +298,7 @@ function insertNewUser(query) {
     let firstName = query.firstName;
     let lastName = query.lastName;
     let password = query.s_password;
+    var hash = bcrypt.hashSync(password, saltRounds);
 
     let conn = dbConnection();
     return new Promise(function (resolve, reject) {
@@ -138,8 +306,8 @@ function insertNewUser(query) {
             if (err) throw err;
             console.log("Connected! Insert user");
 
-            let params = [firstName, lastName, username, password];
-            let sql = 'INSERT INTO user (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
+            let params = [firstName, lastName, username, hash];
+            let sql = 'INSERT INTO \`user\` (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
             conn.query(sql, params, function (err, result) {
                 if (err) throw err;
@@ -147,8 +315,27 @@ function insertNewUser(query) {
             });
         });//connect
     });//promise
-
 }//insertNewUser
+
+async function createNewSchedule(query) {
+    let user = await getUser(query.username);
+    let userId = user[0].userId;
+
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = 'INSERT INTO \`schedule\` (userId) VALUES (?);';
+
+            conn.query(sql, [userId], function (err, result) {
+                if (err) throw err;
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//createNewSchedule
 
 function insertAppointment(body, scheduleId) {
     let conn = dbConnection();
@@ -158,7 +345,7 @@ function insertAppointment(body, scheduleId) {
             if (err) throw err;
             console.log("Connected! Insert appointment");
 
-            let sql = `INSERT INTO appointment
+            let sql = `INSERT INTO \`appointment\`
                        (scheduleId, description, date, startTime, endTime)
                        VALUES (?,?,?,?,?)
                        `;
@@ -191,8 +378,8 @@ function deleteAppointment(body, scheduleId) {
                        FROM appointment
                        WHERE scheduleId = ?
                        AND description = ? 
-                       AND date = ?
-                       AND startTime = ?
+                       AND date = ? 
+                       AND startTime = ? 
                        AND endTime = ?;
                        `;
 
@@ -203,7 +390,7 @@ function deleteAppointment(body, scheduleId) {
             });
         });//connect
     });//promise
-}//insertAppointment
+}//deleteAppointment
 
 function getScheduleId(username) {
     let conn = dbConnection();
@@ -214,7 +401,7 @@ function getScheduleId(username) {
 
             let params = [username];
             let sql = `SELECT s.scheduleId
-                       FROM user u JOIN schedule s ON u.userId = s.scheduleId
+                       FROM \`user\` u JOIN \`schedule\` s ON u.userId = s.scheduleId
                        WHERE u.username = ?;
                        `;
 
@@ -234,8 +421,8 @@ function getGroups() {
         conn.connect(function (err) {
             if (err) throw err;
 
-            let sql = `SELECT groupName 
-                       FROM rfgh18tfdnisudwj.group;
+            let sql = `SELECT groupName, groupId 
+                       FROM \`group\`;
                        `;
 
             conn.query(sql, function (err, rows, fields) {
@@ -246,6 +433,138 @@ function getGroups() {
         });//connect
     });//promise
 }//getGroups
+
+function getUsersGroups(username) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT g.groupname, u.username
+                       FROM \`user\` u 
+                       JOIN \`groupmember\` m ON u.userId = m.userId 
+                       RIGHT JOIN \`group\` g ON m.groupId = g.groupId
+                       ORDER BY g.groupname, u.username;;
+                       `;
+
+            conn.query(sql, [username], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getUsersGroups
+
+function getSingleGroup(query) {
+    // connect to database here to check if group name already exists
+    let groupname = query.groupName;
+
+    let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected! Get group");
+
+            let params = [groupname];
+
+            let sql = `SELECT *
+                       FROM \`group\` g
+                       WHERE g.groupname = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getSingleGroup
+
+function deleteGroup(groupId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+
+            let sql = `DELETE FROM \`group\` 
+                       WHERE groupId = ?;
+                       `;
+
+            conn.query(sql, [groupId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleteGroup
+
+function deleteGroupMemberConnection(groupId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+
+            let sql = `DELETE FROM \`groupmember\` 
+                       WHERE groupId = ?;
+                       `;
+
+            conn.query(sql, [groupId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleteGroupMemberConnection
+
+function addGroupMember(groupId, userId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+            console.log("Connected! Insert appointment");
+
+            let sql = `INSERT INTO \`groupmember\`
+                       (groupId, userId)
+                       VALUES (?, ?)
+                       `;
+
+            let params = [groupId, userId];
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//addGroupMember
+
+function insertNewGroup(query) {
+    let groupname = query.groupName;
+
+    let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected! Insert user");
+
+            let params = [groupname];
+            let sql = 'INSERT INTO \`group\` (groupname) VALUES (?);';
+
+            conn.query(sql, params, function (err, result) {
+                if (err) throw err;
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//insertNewUser
 
 function getSearchResult(query) {
     let searchName = query.searchName;
@@ -261,9 +580,9 @@ function getSearchResult(query) {
 
             let params = [];
             let sql = `SELECT u.firstName, u. username, g.groupName
-                       FROM user u, groupmember m, rfgh18tfdnisudwj.group g
-                       WHERE u.userId = m.userId
-                       AND m.groupId = g.groupId
+                       FROM \`user\` u 
+                       JOIN \`groupmember\` m ON u.userId = m.userId 
+                       JOIN \`group\` g ON m.groupId = g.groupId
                        `;
 
             if (searchName) {
@@ -292,6 +611,119 @@ function getSearchResult(query) {
         });//connect
     });//promise
 }//getSearchResult
+
+function checkPassword(password, hashedValue) {
+    return new Promise(function (resolve, reject) {
+        bcrypt.compare(password, hashedValue, function (err, result) {
+            resolve(result);
+        });//compare
+    });//promise
+}//checkPassword
+
+/**
+ * Checks whether the username exists in database.
+ * if found, returns corresponding record.
+ * @param {string} username
+ * @return {array of objects}
+ */
+function checkUsername(username) {
+    let sql = "SELECT * FROM user WHERE username = ?";
+    return new Promise(function (resolve, reject) {
+        let conn = dbConnection();
+        conn.connect(function (err) {
+            if (err) throw err;
+            conn.query(sql, [username], function (err, rows, fields) {
+                if (err) throw err;
+                resolve(rows);
+            });//query
+        });//connect
+    });//promise
+}//checkUsername
+
+function isAuthenticated(req, res, next) {
+    if (!req.session.authenticated) {
+        res.redirect("/");
+    } else {
+        next();
+    }
+}//isAuthenticated
+
+function getEvents(scheduleId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT *
+                       FROM \`appointment\` a
+                       WHERE a.scheduleId = ?
+                       ORDER BY a.date, a.startTime;
+                       `;
+
+            conn.query(sql, [scheduleId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getEvents
+
+function getAppointment(query, id) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let startTime = query.startTime + ":00";
+            let endTime = query.endTime + ":00";
+            let params = [id, query.description, query.date, startTime, endTime];
+
+            let sql = `SELECT *
+                       FROM \`appointment\` a
+                       WHERE a.scheduleId = ? 
+                       AND description = ? 
+                       AND date = ? 
+                       AND startTime = ? 
+                       AND endTime = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getAppointment
+
+function changeAppointment(query, id) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let startTime = query.startTime + ":00";
+            let endTime = query.endTime + ":00";
+            let params = [query.description, query.date, startTime, endTime, id, query.appointmentId];
+
+            let sql = `UPDATE \`appointment\` a 
+                       SET a.description = ?, a.date = ?, a.startTime = ?, a.endTime =  ? 
+                       WHERE a.scheduleId = ? 
+                       AND a.appointmentId = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//changeAppointment
 
 function dbConnection() {
     let conn = mysql.createConnection({

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a new group</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+    <!--ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body class="text-center">
+<br>
+<h4>Create a new group!</h4>
+<br>
+
+Group name: <input type="text" id="groupName" name="groupName"><br> <br>
+
+<br><br>
+<button id="addGroupBtn" class="btn btn-lg btn-info">Add group!</button>
+<br><br>
+<div id="addGroupError"></div>
+<br>
+<script>
+    $("#addGroupBtn").on("click", function () {
+        let groupName = $("#groupName").val();
+
+        if (groupName == "") {
+            $("#addGroupError").attr("class", "text-danger");
+            $("#addGroupError").html("Please enter a group name!");
+            return;
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/addGroupRequest",
+            dataType: "json",
+            data: {
+                "groupName": groupName
+            },
+            success: function (result, status) {
+                if (result == false) {
+                    $("#addGroupError").attr("class", "text-danger");
+                    $("#addGroupError").html("Sorry, group could not be added.");
+                } else {
+                    $("#addGroupError").attr("class", "text-success");
+                    $("#addGroupError").html("Group was created successfully.");
+                }
+            }
+
+        });//ajax
+    });//signUpBtn
+</script>
+</body>
+</html>

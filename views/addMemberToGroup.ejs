@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a new member to a group</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+    <!--ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body class="text-center">
+<br>
+<h4>Add a new member to a group!</h4>
+<br>
+
+Group name:
+<select name="selectedGroup" id="seelectedGroup">
+    <option value=""> Select One</option>
+    <% groups.forEach(function(i){ %>
+        <option> <%= i.groupName %>  </option>
+    <% }); %>
+</select>
+<br> <br>
+New member: <input type="text" id="member" name="member"><br> <br>
+
+<br><br>
+<button id="addMemberBtn" class="btn btn-lg btn-info">Add new member!</button>
+<br><br>
+<div id="addMemberError"></div>
+<br>
+<script>
+    // user deletes appointment
+    $("#addMemberBtn").on("click", function () {
+        let searchGroup = $("#selectedGroup").val();
+        let member = $("#member").val();
+
+        if (searchGroup == "" || searchGroup == "Select one") {
+            $("#addMemberError").attr("class", "text-danger");
+            $("#addMemberError").html("Please select a group!");
+            return;
+        } else if (member == "") {
+            $("#addMemberError").attr("class", "text-danger");
+            $("#addMemberError").html("Please enter a username as new member!");
+            return;
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/addNewMemberRequest",
+            dataType: "json",
+            data: {
+                "groupName": searchGroup,
+                "member": member
+            },
+            success: function (result, status) {
+                if (result == false) {
+                    $("#addMemberError").attr("class", "text-danger");
+                    $("#addMemberError").html("Sorry, new member could not be added to selected group.");
+                } else {
+                    $("#addMemberError").attr("class", "text-success");
+                    $("#addMemberError").html("New member was added to group successfully.");
+                }
+            }
+
+        });//ajax
+    });//signUpBtn
+</script>
+</body>
+</html>
