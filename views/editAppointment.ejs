@@ -34,27 +34,33 @@ Change the information and click "change appointment"."
 <script>
     let appointmentId = 0;
 
+    //get appointmentId so that user can edit the appointment afterwards
     $("#getAppointmentBtn").on("click", function () {
         let date = $("#date").val();
         let startTime = $("#startTime").val();
         let endTime = $("#endTime").val();
         let description = $("#description").val();
 
+        $("#editAppointmentError").hide();
         if (date == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a date!");
+            $("#editAppointmentError").show();
             return;
         } else if (startTime == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a start time!");
+            $("#editAppointmentError").show();
             return;
         } else if (endTime == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a end time!");
+            $("#editAppointmentError").show();
             return;
         } else if (description == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a description!");
+            $("#editAppointmentError").show();
             return;
         }
 
@@ -69,44 +75,53 @@ Change the information and click "change appointment"."
                 "description": description
             },
             success: function (result, status) {
+                $("#editAppointmentError").hide();
                 if (result == false) {
                     $("#editAppointmentError").attr("class", "text-danger");
                     $("#editAppointmentError").html("Sorry, your appointment was not found.");
+                    $("#editAppointmentError").show();
                 } else {
                     appointmentId = result[0].appointmentId;
                     $("#editAppointmentError").attr("class", "text-success");
                     $("#editAppointmentError").html("Appointment was found. You can edit it now.");
+                    $("#editAppointmentError").show();
                 }
             }
-
         });//ajax
     });//getAppointmentBtn
 
+    //user edits appointment
     $("#changeAppointmentBtn").on("click", function () {
         let date = $("#date").val();
         let startTime = $("#startTime").val();
         let endTime = $("#endTime").val();
         let description = $("#description").val();
 
+        $("#editAppointmentError").hide();
         if (appointmentId == 0) {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Appointment cannot be changed!");
+            $("#editAppointmentError").show();
             return;
         } else if (date == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a date!");
+            $("#editAppointmentError").show();
             return;
         } else if (startTime == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a start time!");
+            $("#editAppointmentError").show();
             return;
         } else if (endTime == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a end time!");
+            $("#editAppointmentError").show();
             return;
         } else if (description == "") {
             $("#editAppointmentError").attr("class", "text-danger");
             $("#editAppointmentError").html("Please enter a description!");
+            $("#editAppointmentError").show();
             return;
         }
 
@@ -122,12 +137,15 @@ Change the information and click "change appointment"."
                 "description": description
             },
             success: function (result, status) {
+                $("#editAppointmentError").hide();
                 if (result == false) {
                     $("#editAppointmentError").attr("class", "text-danger");
                     $("#editAppointmentError").html("Sorry, your appointment could not be changed.");
+                    $("#editAppointmentError").show();
                 } else {
                     $("#editAppointmentError").attr("class", "text-success");
                     $("#editAppointmentError").html("Appointment was changed.");
+                    $("#editAppointmentError").show();
                 }
             }
         });//ajax

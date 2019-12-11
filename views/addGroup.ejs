@@ -25,12 +25,15 @@ Group name: <input type="text" id="groupName" name="groupName"><br> <br>
 <div id="addGroupError"></div>
 <br>
 <script>
+    //user creates a new group
     $("#addGroupBtn").on("click", function () {
         let groupName = $("#groupName").val();
 
+        $("#addGroupError").hide();
         if (groupName == "") {
             $("#addGroupError").attr("class", "text-danger");
             $("#addGroupError").html("Please enter a group name!");
+            $("#addGroupError").show();
             return;
         }
 
@@ -42,17 +45,19 @@ Group name: <input type="text" id="groupName" name="groupName"><br> <br>
                 "groupName": groupName
             },
             success: function (result, status) {
+                $("#addGroupError").hide();
                 if (result == false) {
                     $("#addGroupError").attr("class", "text-danger");
                     $("#addGroupError").html("Sorry, group could not be added.");
+                    $("#addGroupError").show();
                 } else {
                     $("#addGroupError").attr("class", "text-success");
                     $("#addGroupError").html("Group was created successfully.");
+                    $("#addGroupError").show();
                 }
             }
-
         });//ajax
-    });//signUpBtn
+    });//addGroupBtn
 </script>
 </body>
 </html>

@@ -16,7 +16,7 @@ Password: <input type="text" id="s_password" name="s_password">
     // change from sig up page to login page
     $("#loginBtn").on("click", function () {
         location.href = "/";
-    });//signUpBtn
+    });//loginBtn
 
     // user signs up
     $("#signingUpBtn").on("click", function () {
@@ -25,21 +25,26 @@ Password: <input type="text" id="s_password" name="s_password">
         let lastName = $("#s_lastName").val();
         let password = $("#s_password").val();
 
+        $("#signUpError").hide();
         if (username == "") {
             $("#signUpError").attr("class", "text-danger");
             $("#signUpError").html("Please enter a username!");
+            $("#signUpError").show();
             return;
         } else if (firstName == "") {
             $("#signUpError").attr("class", "text-danger");
             $("#signUpError").html("Please enter a first name!");
+            $("#signUpError").show();
             return;
         } else if (lastName == "") {
             $("#signUpError").attr("class", "text-danger");
             $("#signUpError").html("Please enter a last name!");
+            $("#signUpError").show();
             return;
         } else if (password == "") {
             $("#signUpError").attr("class", "text-danger");
             $("#signUpError").html("Please enter a password!");
+            $("#signUpError").show();
             return;
         }
 
@@ -54,16 +59,19 @@ Password: <input type="text" id="s_password" name="s_password">
                 "s_password": password
             },
             success: function (result, status) {
+                $("#signUpError").hide();
                 if (result == false) {
                     $("#signUpError").attr("class", "text-danger");
                     $("#signUpError").html("Username already taken. Please try again.");
+                    $("#signUpError").show();
                 } else {
                     $("#signUpError").attr("class", "text-success");
                     $("#signUpError").html("Registration was successful.");
+                    $("#signUpError").show();
                 }
             }
 
         });//ajax
-    });//signUpBtn
+    });//signingUpBtn
 </script>
 <% include partials/footer %>

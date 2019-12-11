@@ -50,7 +50,6 @@
 
 <script>
     $(document).ready(function () {
-
         getUsersEvents();
 
         function getUsersEvents() {
@@ -69,7 +68,7 @@
                     $("#message").hide();
 
                     if (result.length == 0) {
-                        $("#message").attr("class", "text-info");
+                        $("#message").attr("class", "text-danger");
                         $("#message").html("You currently don't have any appointments.")
                         $("#message").show();
                     } else {
@@ -135,6 +134,6 @@
         timeValue += (hours >= 12) ? " P.M." : " A.M.";  // get AM/PM
 
         return timeValue;
-    }
+    }//convertTime
 </script>
 <% include partials/footer %>
