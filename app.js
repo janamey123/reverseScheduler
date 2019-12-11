@@ -161,6 +161,24 @@ app.get("/addGroup", isAuthenticated, function (req, res) {
     res.render("addGroup");
 });
 
+app.get("/addGroupRequest", async function (req, res) {
+    let group = await getSingleGroup(req.query);
+    let success = false;
+    try {
+        if (group[0].groupname == req.query.groupName) {
+            res.send(success);
+        }
+    } catch (e) {
+        let insert = await insertNewGroup(req.query);
+        if (insert.affectedRows == 0) {
+            res.send(success);
+        } else {
+            success = true;
+            res.send(success);
+        }
+    }
+});
+
 app.get("/addMemberToGroup", isAuthenticated, function (req, res) {
     res.render("addMemberToGroup");
 });
@@ -376,7 +394,7 @@ function getUsersGroups(username) {
             let sql = `SELECT g.groupname, u.username
                        FROM \`user\` u 
                        JOIN \`groupmember\` m ON u.userId = m.userId 
-                       JOIN \`group\` g ON m.groupId = g.groupId
+                       RIGHT JOIN \`group\` g ON m.groupId = g.groupId
                        ORDER BY g.groupname, u.username;;
                        `;
 
@@ -388,6 +406,51 @@ function getUsersGroups(username) {
         });//connect
     });//promise
 }//getUsersGroups
+
+function getSingleGroup(query) {
+    // connect to database here to check if group name already exists
+    let groupname = query.groupName;
+
+    let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected! Get group");
+
+            let params = [groupname];
+
+            let sql = `SELECT *
+                       FROM \`group\` g
+                       WHERE g.groupname = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getSingleGroup
+
+function insertNewGroup(query) {
+    let groupname = query.groupName;
+
+    let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected! Insert user");
+
+            let params = [groupname];
+            let sql = 'INSERT INTO \`group\` (groupname) VALUES (?);';
+
+            conn.query(sql, params, function (err, result) {
+                if (err) throw err;
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//insertNewUser
 
 function getSearchResult(query) {
     let searchName = query.searchName;
