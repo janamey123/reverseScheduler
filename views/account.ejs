@@ -10,7 +10,50 @@
 
 your account
 <br><br>
+
+<div class="d-flex justify-content-center p-2">
+            <div class="d-flex flex-column">
+                <!--<div class="p-2" id="likes0"></div>-->
+                <div class="p-2">
+                    <img id="pic0" class="rounded" src="">
+                </div>
+            </div>
+</div>
+
+<br><br>
 <script>
 
+/* global $ */
+            var API_KEY="13831310-cbee89d52c56545c1331abbec";
+            var things = ['dog', 'cat', 'bird', 'grandpa', 'grandma', 'rock','tree','computer','light','water','sand', ];
+            var thing = things[Math.floor(Math.random()*things.length)];
+            var rand = Math.floor(Math.random() * 21);  
+            
+            //$("#vert").on("click", function(){
+            
+            //$("#vert").on("click", function(){
+            $(document).ready(function() {
+               
+                $.ajax({
+                    method: "GET",
+                    url: "https://pixabay.com/api/?key=" + API_KEY + "&q=" + thing + "&orientation=vertical",
+                    dataType: "json",
+                    data: { "state": $("#state").val() },
+                    success: function(result,status) {
+                        console.log("https://pixabay.com/api/?key=" + API_KEY + "&q=" + "dog" + "&orientation=vertical");
+                        $("#pic0").attr("src", result.hits[rand].previewURL);
+                        //$("#pic1").attr("src", result.hits[1].previewURL);
+                        //$("#pic2").attr("src", result.hits[2].previewURL);
+                        //$("#pic3").attr("src", result.hits[3].previewURL);
+                        
+                        //$("#likes0").html("Likes: " + result.hits[0].likes);
+                        //$("#likes1").html("Likes: " + result.hits[1].likes);
+                        //$("#likes2").html("Likes: " + result.hits[2].likes);
+                        //$("#likes3").html("Likes: " + result.hits[3].likes);
+                    }
+                });//ajax
+            });
+
 </script>
+
 <% include partials/footer %>
