@@ -194,12 +194,17 @@ app.get("/addMemberToGroup", isAuthenticated, async function (req, res) {
 app.get("/addNewMemberRequest", async function (req, res) {
     let user = await getUser(req.query.member);
     let group = await getSingleGroup(req.query);
-
-    console.log("groupID " + group[0].groupId);
-
     let success = false;
+    let userId = 0;
 
-    let addUser = await addGroupMember(group[0].groupId, user[0].userId);
+    try {
+        userId = user[0].userId;
+    } catch (e) {
+        res.send(success);
+        return;
+    }
+
+    let addUser = await addGroupMember(group[0].groupId, userId);
     if (addUser.affectedRows == 0) {
         res.send(success);
     } else {
