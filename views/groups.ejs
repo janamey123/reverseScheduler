@@ -7,7 +7,7 @@
 </div>
 
 <br><br>
-<h3>My groups</h3>
+<h3>Groups</h3>
 <br>
 
 <table class="centered">
@@ -117,7 +117,7 @@ Group name:
 
                 for (let i = 0; i < result.length; i++) {
                     let key = "\#" + i;
-                    $(key).html(result[i].firstName + " - " + result[i].username + " - " + result[i].groupName);
+                    $(key).html(result[i].username + " - " + result[i].description + " - " + result[i].date + " - " + result[i].startTime + " - " + result[i].endTime);
                 }
 
             }

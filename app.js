@@ -240,25 +240,8 @@ app.get("/deleteGroupRequest", async function (req, res) {
 });
 
 app.get("/getAvailability", async function (req, res) {
-
-
-    let group = await getSingleGroup(req.query);
-    let success = false;
-    try {
-        console.log("groupID " + group[0].groupId);
-
-        let delGroup = await deleteGroup(group[0].groupId);
-        let delMemberConn = await deleteGroupMemberConnection(group[0].groupId);
-
-        if (delGroup.affectedRows == 0) {
-            res.send(success);
-        } else {
-            success = true;
-            res.send(success);
-        }
-    } catch (e) {
-        res.send(success);
-    }
+    let available = await getAvailabilityOfGroup(req.query);
+    res.send(available);
 });
 
 app.get("/signUp", function (req, res) {
@@ -588,6 +571,35 @@ function insertNewGroup(query) {
         });//connect
     });//promise
 }//insertNewUser
+
+function getAvailabilityOfGroup(query) {
+    let groupname = query.groupName;
+
+    let conn = dbConnection();
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [groupname];
+            let sql = `SELECT u.username, a.description, a.date, a.startTime, a.endTime
+                       FROM \`appointment\` a 
+                       JOIN \`schedule\` s ON a.scheduleId = s.scheduleId
+                       JOIN \`user\` u ON s.userId = u.userId
+                       WHERE u.userId IN (  
+                                          SELECT m.userId
+                                          FROM \`groupmember\` m 
+                                          JOIN \`group\` g ON m.groupId = g.groupId
+                                          WHERE g.groupName = ?)
+                       ORDER BY a.date, a.startTime;
+                       `;
+
+            conn.query(sql, params, function (err, result) {
+                if (err) throw err;
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//getAvailabilityOfGroup
 
 function getSearchResult(query) {
     let searchName = query.searchName;
