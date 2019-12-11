@@ -33,18 +33,21 @@ New member: <input type="text" id="member" name="member"><br> <br>
 <div id="addMemberError"></div>
 <br>
 <script>
-    // user deletes appointment
+    // user adds a member to a group
     $("#addMemberBtn").on("click", function () {
         let searchGroup = $("#selectedGroup").val();
         let member = $("#member").val();
 
+        $("#addMemberError").hide();
         if (searchGroup == "" || searchGroup == "Select one") {
             $("#addMemberError").attr("class", "text-danger");
             $("#addMemberError").html("Please select a group!");
+            $("#addMemberError").show();
             return;
         } else if (member == "") {
             $("#addMemberError").attr("class", "text-danger");
             $("#addMemberError").html("Please enter a username as new member!");
+            $("#addMemberError").show();
             return;
         }
 
@@ -57,17 +60,19 @@ New member: <input type="text" id="member" name="member"><br> <br>
                 "member": member
             },
             success: function (result, status) {
+                $("#addMemberError").hide();
                 if (result == false) {
                     $("#addMemberError").attr("class", "text-danger");
                     $("#addMemberError").html("Sorry, new member could not be added to selected group.");
+                    $("#addMemberError").show();
                 } else {
                     $("#addMemberError").attr("class", "text-success");
                     $("#addMemberError").html("New member was added to group successfully.");
+                    $("#addMemberError").show();
                 }
             }
-
         });//ajax
-    });//signUpBtn
+    });//addMemberBtn
 </script>
 </body>
 </html>

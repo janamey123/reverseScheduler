@@ -34,21 +34,26 @@ Description: <input type="text" id="description" name="description">
         let endTime = $("#endTime").val();
         let description = $("#description").val();
 
+        $("#addAppointmentError").hide();
         if (date == "") {
             $("#addAppointmentError").attr("class", "text-danger");
             $("#addAppointmentError").html("Please enter a date!");
+            $("#addAppointmentError").show();
             return;
         } else if (startTime == "") {
             $("#addAppointmentError").attr("class", "text-danger");
             $("#addAppointmentError").html("Please enter a start time!");
+            $("#addAppointmentError").show();
             return;
         } else if (endTime == "") {
             $("#addAppointmentError").attr("class", "text-danger");
             $("#addAppointmentError").html("Please enter a end time!");
+            $("#addAppointmentError").show();
             return;
         } else if (description == "") {
             $("#addAppointmentError").attr("class", "text-danger");
             $("#addAppointmentError").html("Please enter a description!");
+            $("#addAppointmentError").show();
             return;
         }
 
@@ -63,17 +68,19 @@ Description: <input type="text" id="description" name="description">
                 "description": description
             },
             success: function (result, status) {
+                $("#addAppointmentError").hide();
                 if (result == false) {
                     $("#addAppointmentError").attr("class", "text-danger");
                     $("#addAppointmentError").html("Sorry, your appointment was not added to your schedule.");
+                    $("#addAppointmentError").show();
                 } else {
                     $("#addAppointmentError").attr("class", "text-success");
                     $("#addAppointmentError").html("Appointment was added to your schedule successfully.");
+                    $("#addAppointmentError").show();
                 }
             }
-
         });//ajax
-    });//signUpBtn
+    });//addAppointmentBtn
 </script>
 </body>
 </html>

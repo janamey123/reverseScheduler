@@ -30,13 +30,15 @@ Group name:
 <div id="deleteGroupError"></div>
 <br>
 <script>
-
+    //user deletes group
     $("#deleteGroupBtn").on("click", function () {
         let groupName = $("#selectedGroup").val();
 
+        $("#deleteGroupError").hide();
         if (groupName == "" || groupName == "Select one") {
             $("#deleteGroupError").attr("class", "text-danger");
             $("#deleteGroupError").html("Please select a group!");
+            $("#deleteGroupError").show();
             return;
         }
 
@@ -48,15 +50,17 @@ Group name:
                 "groupName": groupName
             },
             success: function (result, status) {
+                $("#deleteGroupError").hide();
                 if (result == false) {
                     $("#deleteGroupError").attr("class", "text-danger");
                     $("#deleteGroupError").html("Sorry, group could not be deleted.");
+                    $("#deleteGroupError").show();
                 } else {
                     $("#deleteGroupError").attr("class", "text-success");
                     $("#deleteGroupError").html("Group was deleted successfully.");
+                    $("#deleteGroupError").show();
                 }
             }
-
         });//ajax
     });//deleteGroupBtn
 </script>
