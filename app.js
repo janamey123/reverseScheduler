@@ -173,14 +173,39 @@ app.get("/addGroupRequest", async function (req, res) {
         if (insert.affectedRows == 0) {
             res.send(success);
         } else {
+            let user = await getUser(req.session.username);
+            let group = await getSingleGroup(req.query);
+
+            let addUser = await addGroupMember(group[0].groupId, user[0].userId);
+            if (addUser.affectedRows == 0) {
+                res.send(success);
+            }
             success = true;
             res.send(success);
         }
     }
 });
 
-app.get("/addMemberToGroup", isAuthenticated, function (req, res) {
-    res.render("addMemberToGroup");
+app.get("/addMemberToGroup", isAuthenticated, async function (req, res) {
+    let groups = await getGroups();
+    res.render("addMemberToGroup", {"groups": groups});
+});
+
+app.get("/addNewMemberRequest", async function (req, res) {
+    let user = await getUser(req.query.member);
+    let group = await getSingleGroup(req.query);
+
+    console.log("groupID " + group[0].groupId);
+
+    let success = false;
+
+    let addUser = await addGroupMember(group[0].groupId, user[0].userId);
+    if (addUser.affectedRows == 0) {
+        res.send(success);
+    } else {
+        success = true;
+        res.send(success);
+    }
 });
 
 app.get("/deleteGroup", isAuthenticated, function (req, res) {
@@ -192,7 +217,7 @@ app.get("/signUp", function (req, res) {
 });
 
 app.get("/signingUpRequest", async function (req, res) {
-    let user = await getUser(req.query);
+    let user = await getUser(req.query.username);
     let success = false;
     try {
         if (user[0].username == req.query.username) {
@@ -218,11 +243,10 @@ app.get("/userSearchSection", async function (req, res) {
 
 // functions
 
-function getUser(query) {
+function getUser(username) {
     // connect to database here to check if user already exists
-    let username = query.username;
-
     let conn = dbConnection();
+
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
@@ -268,7 +292,7 @@ function insertNewUser(query) {
 }//insertNewUser
 
 async function createNewSchedule(query) {
-    let user = await getUser(query);
+    let user = await getUser(query.username);
     let userId = user[0].userId;
 
     let conn = dbConnection();
@@ -371,7 +395,7 @@ function getGroups() {
         conn.connect(function (err) {
             if (err) throw err;
 
-            let sql = `SELECT groupName 
+            let sql = `SELECT groupName, groupId 
                        FROM \`group\`;
                        `;
 
@@ -431,6 +455,30 @@ function getSingleGroup(query) {
         });//connect
     });//promise
 }//getSingleGroup
+
+function addGroupMember(groupId, userId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(async function (err) {
+            if (err) throw err;
+            console.log("Connected! Insert appointment");
+
+            let sql = `INSERT INTO \`groupmember\`
+                       (groupId, userId)
+                       VALUES (?, ?)
+                       `;
+
+            let params = [groupId, userId];
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//addGroupMember
 
 function insertNewGroup(query) {
     let groupname = query.groupName;

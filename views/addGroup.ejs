@@ -44,10 +44,10 @@ Group name: <input type="text" id="groupName" name="groupName"><br> <br>
             success: function (result, status) {
                 if (result == false) {
                     $("#addGroupError").attr("class", "text-danger");
-                    $("#addGroupError").html("Sorry, your appointment was not deleted from your schedule.");
+                    $("#addGroupError").html("Sorry, group could not be added.");
                 } else {
                     $("#addGroupError").attr("class", "text-success");
-                    $("#addGroupError").html("Appointment was deleted from your schedule successfully.");
+                    $("#addGroupError").html("Group was created successfully.");
                 }
             }
 
