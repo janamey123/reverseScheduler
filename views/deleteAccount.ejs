@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Account</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+    <!--ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body class="text-center">
+<br>
+<h4>Delete Account</h4>
+<br>
+Are you sure you want to delete account?
+
+<br><br>
+<button id="delete" class="btn btn-lg btn-danger">Delete</button>
+<br><br>
+<div id="deleteAcc"></div>
+<br>
+<script>
+    //user creates a new group
+    $("#delete").on("click", function () {
+
+        $.ajax({
+            method: "GET",
+            url: "/deleteUser",
+            dataType: "json",
+            success: function (result, status) {
+                $("#deleteAcc").hide();
+                if (result == false) {
+                    $("#deleteAcc").attr("class", "text-danger");
+                    $("#deleteAcc").html("Sorry, could not update.");
+                    $("#deleteAcc").show();
+                } else {
+                    location.href="/logout";
+                }
+            }
+        });//ajax
+    });//updateBtn
+</script>
+</body>
+</html>

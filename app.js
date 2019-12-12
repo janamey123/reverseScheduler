@@ -290,6 +290,20 @@ app.get("/upUser", async function(req, res){
     }
     
 });
+app.get("/deleteUser", async function(req, res){
+    try{
+        let userId=await getUser(req.session.username);
+        let scheduleId=await getScheduleId(req.session.username);
+       let user=await deleteUser(req.session.username);
+       let schedule=await deleteS(userId[0].userId);
+       let groupmember=await deleteG(userId[0].userId);
+       let appointment=await deleteA(scheduleId[0].scheduleId);
+      res.send(true); 
+    }catch(e){
+        res.send(false);
+    }
+    
+});
 
 
 // functions
@@ -805,6 +819,107 @@ function updateUser(query, user) {
         });//connect
     });//promise
 }//updateUser
+
+
+function deleteUser(user) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [user];
+
+            let sql = `DELETE
+                       FROM \`user\` u
+                       WHERE u.username = ? 
+                       ;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleUser
+
+
+function deleteS(userId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [userId];
+
+            let sql = `DELETE
+                       FROM \`schedule\` s
+                       WHERE s.userId = ? 
+                       ;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleUser
+
+
+function deleteG(userId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [userId];
+
+            let sql = `DELETE
+                       FROM \`groupmember\` g
+                       WHERE g.userId = ? 
+                       ;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleUser
+
+
+function deleteA(scheduleId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [scheduleId];
+
+            let sql = `DELETE
+                       FROM \`appointment\` a
+                       WHERE a.scheduleId = ? 
+                       ;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//deleUser
+
 
 function dbConnection() {
     let conn = mysql.createConnection({
