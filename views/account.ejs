@@ -8,6 +8,11 @@
 
 <br><br>
 
+<div id="uname"> </div>
+<div id="fname"></div>
+<div id="lname"></div>
+
+
 your account
 <br><br>
 
@@ -15,6 +20,7 @@ your account
     <div class="d-flex flex-column">
         <div class="p-2">
             <img id="pic0" class="rounded" src="">
+            
         </div>
     </div>
 </div>
@@ -29,6 +35,20 @@ your account
     var rand = Math.floor(Math.random() * 21);
 
     $(document).ready(function () {
+        users();
+         function users(){
+              $.ajax({
+                method: "GET",
+                url: "/getUserInfo",
+                dataType: "json",
+                success: function (result, status) {
+                   
+                            $("#uname").html("Username:" + result[0].username);
+                            $("#fname").html("First Name:" + result[0].firstName);
+                            $("#lname").html("Last Name:" + result[0].lastName);
+                        }
+                    });
+         }
 
         $.ajax({
             method: "GET",

@@ -271,6 +271,10 @@ app.get("/userSearchSection", async function (req, res) {
     let searchResult = await getSearchResult(req.query);
     res.send(searchResult);
 });
+app.get("/getUserInfo", async function(req, res){
+    let user= await getUser(req.session.username);
+    res=send(user);
+});
 
 
 // functions
