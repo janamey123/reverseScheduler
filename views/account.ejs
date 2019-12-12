@@ -25,7 +25,6 @@
     </div>
 </div>
 
-
 <p><a id="update" class="btn btn-outline-success" href="/updateAccount"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Update Account</a></p>
 
@@ -33,6 +32,20 @@
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete</a></p>
 
 <br><br>
+
+<h4>Numbers:</h4>
+<br>
+<button id="totalAmount" class="btn btn-outline btn-info">Total amount of hours of user not available</button>
+<button id="avgAmountHours" class="btn btn-outline btn-info">Average amount of hours not available</button>
+<button id="sumAppointment" class="btn btn-outline btn-info">Sum of appointments per user</button>
+
+<br><br>
+<div id="title"></div>
+<br>
+<div id="result"></div>
+<br>
+<div id="message"></div>
+<br>
 <form action="/logout">
     <button class="btn btn-lg btn-danger">Logout</button>
 </form>
@@ -70,6 +83,73 @@
             }
         });//ajax
     });//ready
+
+    $("#totalAmount").on("click", function () {
+        $("#title").empty();
+        $("#result").empty();
+
+        $.ajax({
+            method: "GET",
+            url: "/totalAmountHoursUser",
+            dataType: "json",
+            success: function (result, status) {
+                let time = "";
+                let timeKey = "";
+
+
+                if (result.length == 0) {
+                    $("#message").attr("class", "text-danger");
+                    $("#message").html("Sorry, we couldn't get that information.")
+                    $("#message").show();
+                } else {
+                    for (let i = 0; i < result.length; i++) {
+                        $("#result").append(`<div name="result" id="result${i}">`);
+                    }
+
+                    $("#title").html("Total amount of hours of user not available:");
+
+                    for (let i = 0; i < result.length; i++) {
+                        time = result[i].time / 10000;
+                        timeKey = "\#result" + i;
+
+                        $(timeKey).html(result[i].username + ": " + time + " hours");
+                    }
+                }
+            }
+        });//ajax
+    });//totalAmount
+
+    $("#sumAppointment").on("click", function () {
+        $("#title").empty();
+        $("#result").empty();
+
+        $.ajax({
+            method: "GET",
+            url: "/sumAppointments",
+            dataType: "json",
+            success: function (result, status) {
+                let countKey = "";
+
+
+                if (result.length == 0) {
+                    $("#message").attr("class", "text-danger");
+                    $("#message").html("Sorry, we couldn't get that information.")
+                    $("#message").show();
+                } else {
+                    for (let i = 0; i < result.length; i++) {
+                        $("#result").append(`<div name="result" id="result${i}">`);
+                    }
+
+                    $("#title").html("Sum of appointments per user:");
+
+                    for (let i = 0; i < result.length; i++) {
+                        countKey = "\#result" + i;
+                        $(countKey).html(result[i].username + ": " + result[i].count + " appointments");
+                    }
+                }
+            }
+        });//ajax
+    });//sumAppointment
 
     var popupWindow = null;
 

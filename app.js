@@ -329,6 +329,16 @@ app.get("/deleteUser", async function (req, res) {
     }
 });//deleteAccount
 
+app.get("/totalAmountHoursUser", async function (req, res) {
+        let number = await getTotalAmountHoursUser();
+        res.send(number);
+});//totalAmountHoursUser
+
+app.get("/sumAppointments", async function (req, res) {
+    let number = await getSumAppointmentPerUser();
+    res.send(number);
+});//totalAmount
+
 
 //***********//
 // functions //
@@ -938,6 +948,52 @@ function deleteA(scheduleId) {
         });//connect
     });//promise
 }//deleteAppointments
+
+function getTotalAmountHoursUser() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT u.username, sum((a.endTime - a.startTime)) as 'time'
+                       FROM \`appointment\` a 
+                       JOIN \`schedule\` s ON a.scheduleId = s.scheduleId 
+                       JOIN \`user\` u ON s.userId = u.userId
+                       GROUP BY u.username;
+                       `;
+
+            conn.query(sql, function (err, result) {
+                if (err) throw err;
+                conn.end();
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//getTotalAmountHoursUser
+
+function getSumAppointmentPerUser() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT u.username, count(a.appointmentId) as 'count'
+                       FROM \`appointment\` a 
+                       JOIN \`schedule\` s ON a.scheduleId = s.scheduleId 
+                       JOIN \`user\` u ON s.userId = u.userId
+                       GROUP BY a.scheduleId;
+                       `;
+
+            conn.query(sql, function (err, result) {
+                if (err) throw err;
+                conn.end();
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//getSumAppointmentPerUser
 
 //Building connection to database
 function dbConnection() {
