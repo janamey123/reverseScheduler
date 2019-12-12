@@ -831,8 +831,8 @@ function deleteUser(user) {
             let params = [user];
 
             let sql = `DELETE
-                       FROM \`user\` u
-                       WHERE u.username = ? 
+                       FROM \`user\` 
+                       WHERE username = ? 
                        ;
                        `;
 
@@ -856,8 +856,8 @@ function deleteS(userId) {
             let params = [userId];
 
             let sql = `DELETE
-                       FROM \`schedule\` s
-                       WHERE s.userId = ? 
+                       FROM \`schedule\` 
+                       WHERE userId = ? 
                        ;
                        `;
 
@@ -881,8 +881,8 @@ function deleteG(userId) {
             let params = [userId];
 
             let sql = `DELETE
-                       FROM \`groupmember\` g
-                       WHERE g.userId = ? 
+                       FROM \`groupmember\` 
+                       WHERE userId = ? 
                        ;
                        `;
 
@@ -906,8 +906,8 @@ function deleteA(scheduleId) {
             let params = [scheduleId];
 
             let sql = `DELETE
-                       FROM \`appointment\` a
-                       WHERE a.scheduleId = ? 
+                       FROM \`appointment\` 
+                       WHERE scheduleId = ? 
                        ;
                        `;
 
