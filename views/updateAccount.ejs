@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Account</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+    <!--ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body class="text-center">
+<br>
+<h4>Update Account</h4>
+<br>
+
+Username: <input type="text" id="username" name="username"><br> <br>
+First Name: <input type="text" id="firstName" name="firstName"><br> <br>
+Last Name: <input type="text" id="lastName" name="lastName"><br> <br>
+Password: <input type="text" id="password" name="password"><br> <br>
+
+<br><br>
+<button id="updateAccBtn" class="btn btn-lg btn-info">Update</button>
+<br><br>
+<div id="updateError"></div>
+<br>
+<script>
+    //user updates his account infos
+    $("#updateAccBtn").on("click", function () {
+        let username = $("#username").val();
+        let firstname = $("#firstName").val();
+        let lastname = $("#lastName").val();
+        let old = $("#password").val();
+
+        $("#updateError").hide();
+        if (username == "" && firstname == "" && lastname == "" && old == "") {
+            $("#updateError").attr("class", "text-danger");
+            $("#updateError").html("Please enter enter all information. ");
+            $("#updateError").show();
+            return;
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/upUser",
+            dataType: "json",
+            data: {
+                "username": username,
+                "firstname": firstname,
+                "lastname": lastname,
+                "old": old
+            },
+            success: function (result, status) {
+                $("#updateError").hide();
+                if (result == false) {
+                    $("#updateError").attr("class", "text-danger");
+                    $("#updateError").html("Sorry, could not update.");
+                    $("#updateError").show();
+                } else {
+                    $("#updateError").attr("class", "text-success");
+                    $("#updateError").html("Update was successful!");
+                    $("#updateError").show();
+                }
+            }
+        });//ajax
+    });//updateAccBtn
+</script>
+</body>
+</html>
