@@ -36,7 +36,7 @@ Password: <input type="text" id="password" name="password"><br> <br>
         let old = $("#password").val();
 
         $("#updateError").hide();
-        if (username == "" && firstname == "" && lastname == "" && old == "") {
+        if (username == "" || firstname == "" || lastname == "" || old == "") {
             $("#updateError").attr("class", "text-danger");
             $("#updateError").html("Please enter enter all information. ");
             $("#updateError").show();
