@@ -275,6 +275,21 @@ app.get("/getUserInfo", async function(req, res){
     let user= await getUser(req.session.username);
     res.send(user);
 });
+app.get("/updateAccount", async function(req, res){
+    res.render("updateAccount");
+});
+app.get("/deleteAccount", async function(req, res){
+    res.render("deleteAccount");
+});
+app.get("/upUser", async function(req, res){
+    try{
+       let user=await updateUser(req.query, req.session.username);
+      res.send(true); 
+    }catch(e){
+        res.send(false);
+    }
+    
+});
 
 
 // functions
@@ -763,6 +778,33 @@ function changeAppointment(query, id) {
         });//connect
     });//promise
 }//changeAppointment
+
+function updateUser(query, user) {
+    
+    let password=query.old;
+    var hash=bcrypt.hashSync(password,saltRounds);
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [query.firstname, query.lastname, query.username, hash];
+
+            let sql = `UPDATE \`user\` u
+                       SET u.firstName = ?, u.lastName = ?, u.username = ?, u.password =  ? 
+                       WHERE u.username = ? 
+                       ;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//updateUser
 
 function dbConnection() {
     let conn = mysql.createConnection({

@@ -25,6 +25,13 @@
     </div>
 </div>
 
+
+    p><a id="update" class="btn btn-outline-success" href="/updateAccount"
+      onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Update Account</a></p>
+      
+    <p><a id="delete" class="btn btn-outline-danger" href="/deleteAccount"
+      onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete</a></p>
+      
 <br><br>
 <script>
 
@@ -61,6 +68,18 @@
             }
         });//ajax
     });//ready
+    
+    
+    var popupWindow = null;
+
+    function centeredPopup(url, winName, w, h, scroll) {
+        LeftPosition = (screen.width) ? (screen.width - w) / 2 : 0;
+        TopPosition = (screen.height) ? (screen.height - h) / 2 : 0;
+        settings =
+            'height=' + h + ',width=' + w + ',top=' + TopPosition + ',left=' + LeftPosition + ',scrollbars=' + scroll + ',resizable'
+        popupWindow = window.open(url, winName, settings)
+    }
+    
 </script>
 
 <% include partials/footer %>
