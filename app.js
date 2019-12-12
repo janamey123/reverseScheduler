@@ -789,7 +789,7 @@ function updateUser(query, user) {
         conn.connect(function (err) {
             if (err) throw err;
 
-            let params = [query.firstname, query.lastname, query.username, hash];
+            let params = [query.firstname, query.lastname, query.username, hash, user];
 
             let sql = `UPDATE \`user\` u
                        SET u.firstName = ?, u.lastName = ?, u.username = ?, u.password =  ? 
