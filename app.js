@@ -264,7 +264,6 @@ app.get("/deleteGroupRequest", async function (req, res) {
     let group = await getSingleGroup(req.query);
     let success = false;
     try {
-        console.log("groupID " + group[0].groupId);
 
         let delGroup = await deleteGroup(group[0].groupId);
         let delMemberConn = await deleteGroupMemberConnection(group[0].groupId);
@@ -346,7 +345,6 @@ function getUser(username) {
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
-            console.log("Connected! Get user");
 
             let params = [username];
 
@@ -357,6 +355,7 @@ function getUser(username) {
 
             conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
+                conn.end();
                 resolve(rows);
             });
         });//connect
@@ -374,13 +373,13 @@ function insertNewUser(query) {
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
-            console.log("Connected! Insert user");
 
             let params = [firstName, lastName, username, hash];
             let sql = 'INSERT INTO \`user\` (firstName, lastName, username, password) VALUES (?, ?, ?, ?);';
 
             conn.query(sql, params, function (err, result) {
                 if (err) throw err;
+                conn.end();
                 resolve(result);
             });
         });//connect
@@ -467,6 +466,7 @@ async function createNewSchedule(query) {
 
             conn.query(sql, [userId], function (err, result) {
                 if (err) throw err;
+                conn.end();
                 resolve(result);
             });
         });//connect
@@ -479,7 +479,6 @@ function insertAppointment(body, scheduleId) {
     return new Promise(function (resolve, reject) {
         conn.connect(async function (err) {
             if (err) throw err;
-            console.log("Connected! Insert appointment");
 
             let sql = `INSERT INTO \`appointment\`
                        (scheduleId, description, date, startTime, endTime)
@@ -503,7 +502,6 @@ function deleteAppointment(body, scheduleId) {
     return new Promise(function (resolve, reject) {
         conn.connect(async function (err) {
             if (err) throw err;
-            console.log("Connected! Delete appointment");
 
             let startTime = body.startTime + ":00";
             let endTime = body.endTime + ":00";
@@ -682,7 +680,6 @@ function getSingleGroup(query) {
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
-            console.log("Connected! Get group");
 
             let params = [groupname];
 
@@ -693,6 +690,7 @@ function getSingleGroup(query) {
 
             conn.query(sql, params, function (err, rows, fields) {
                 if (err) throw err;
+                conn.end();
                 resolve(rows);
             });
         });//connect
@@ -745,7 +743,6 @@ function addGroupMember(groupId, userId) {
     return new Promise(function (resolve, reject) {
         conn.connect(async function (err) {
             if (err) throw err;
-            console.log("Connected! Insert appointment");
 
             let sql = `INSERT INTO \`groupmember\`
                        (groupId, userId)
@@ -770,13 +767,13 @@ function insertNewGroup(query) {
     return new Promise(function (resolve, reject) {
         conn.connect(function (err) {
             if (err) throw err;
-            console.log("Connected! Insert user");
 
             let params = [groupname];
             let sql = 'INSERT INTO \`group\` (groupname) VALUES (?);';
 
             conn.query(sql, params, function (err, result) {
                 if (err) throw err;
+                conn.end();
                 resolve(result);
             });
         });//connect
@@ -806,6 +803,7 @@ function getAvailabilityOfGroup(query) {
 
             conn.query(sql, params, function (err, result) {
                 if (err) throw err;
+                conn.end();
                 resolve(result);
             });
         });//connect

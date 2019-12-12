@@ -63,7 +63,6 @@
             dataType: "json",
             data: {"state": $("#state").val()},
             success: function (result, status) {
-                //console.log("https://pixabay.com/api/?key=" + API_KEY + "&q=" + "dog" + "&orientation=vertical");
                 $("#pic0").attr("src", result.hits[rand].previewURL);
             }
         });//ajax
