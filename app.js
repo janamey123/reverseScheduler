@@ -986,8 +986,9 @@ function getSumAppointmentPerUser() {
 
             let sql = `SELECT u.username, count(a.appointmentId) as 'count'
                        FROM \`appointment\` a 
-                       JOIN \`schedule\` s ON a.scheduleId = s.scheduleId 
-                       JOIN \`user\` u ON s.userId = u.userId
+                       RIGHT OUTER JOIN \`schedule\` r ON a.scheduleId = r.scheduleId 
+                       LEFT OUTER JOIN \`schedule\` l ON a.scheduleId = l.scheduleId 
+                       JOIN \`user\` u ON l.userId = u.userId
                        GROUP BY a.scheduleId;
                        `;
 

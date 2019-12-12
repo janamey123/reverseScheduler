@@ -58,7 +58,20 @@
     var rand = Math.floor(Math.random() * 21);
 
     $(document).ready(function () {
+        getPicture();
         users();
+
+        function getPicture() {
+            $.ajax({
+                method: "GET",
+                url: "https://pixabay.com/api/?key=" + API_KEY + "&q=" + thing + "&orientation=vertical",
+                dataType: "json",
+                data: {"state": $("#state").val()},
+                success: function (result, status) {
+                    $("#pic0").attr("src", result.hits[rand].previewURL);
+                }
+            });//ajax
+        }//getPicture
 
         function users() {
             $.ajax({
@@ -72,16 +85,6 @@
                 }
             });//ajax
         }//users
-
-        $.ajax({
-            method: "GET",
-            url: "https://pixabay.com/api/?key=" + API_KEY + "&q=" + thing + "&orientation=vertical",
-            dataType: "json",
-            data: {"state": $("#state").val()},
-            success: function (result, status) {
-                $("#pic0").attr("src", result.hits[rand].previewURL);
-            }
-        });//ajax
     });//ready
 
     $("#totalAmount").on("click", function () {
