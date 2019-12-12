@@ -51,8 +51,8 @@
                 "username": username, 
                 "firstname": firstname,
                 "lastname": lastname,
-                "old": old,
-                "newP": newP
+                "old": old
+        
                 
             },
             success: function (result, status) {
@@ -63,12 +63,12 @@
                     $("#updateError").show();
                 } else {
                     $("#updateError").attr("class", "text-success");
-                    $("#updateError).html("Update was successful!");
+                    $("#updateError").html("Update was successful!");
                     $("#updateError").show();
                 }
             }
         });//ajax
-    });//addGroupBtn
+    });//updateBtn
 </script>
 </body>
 </html>
