@@ -339,6 +339,11 @@ app.get("/sumAppointments", async function (req, res) {
     res.send(number);
 });//totalAmount
 
+app.get("/avgAmountHours", async function (req, res) {
+    let number = await getAvgAmountHours();
+    res.send(number);
+});//avgAmountHours
+
 
 //***********//
 // functions //
@@ -994,6 +999,32 @@ function getSumAppointmentPerUser() {
         });//connect
     });//promise
 }//getSumAppointmentPerUser
+
+function getAvgAmountHours() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT avg(t.time) as 'avg'
+                       FROM (
+                            SELECT u.username, a.startTime, a.endTime, sum((a.endTime - a.startTime)) as 'time'
+                            FROM \`appointment\` a 
+                            JOIN \`schedule\` s ON a.scheduleId = s.scheduleId 
+                            JOIN \`user\` u ON s.userId = u.userId
+                            GROUP BY u.username) t;
+                       `;
+
+            conn.query(sql, function (err, result) {
+                if (err) throw err;
+                conn.end();
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//getAvgAmountHours
+
 
 //Building connection to database
 function dbConnection() {

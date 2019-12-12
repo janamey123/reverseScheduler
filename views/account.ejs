@@ -119,6 +119,38 @@
         });//ajax
     });//totalAmount
 
+    $("#avgAmountHours").on("click", function () {
+        $("#title").empty();
+        $("#result").empty();
+
+        $.ajax({
+            method: "GET",
+            url: "/avgAmountHours",
+            dataType: "json",
+            success: function (result, status) {
+                let key = "";
+
+                if (result.length == 0) {
+                    $("#message").attr("class", "text-danger");
+                    $("#message").html("Sorry, we couldn't get that information.")
+                    $("#message").show();
+                } else {
+                    for (let i = 0; i < result.length; i++) {
+                        $("#result").append(`<div name="result" id="result${i}">`);
+                    }
+
+                    $("#title").html("Average amount of hours not available:");
+
+                    for (let i = 0; i < result.length; i++) {
+                        let hours = result[i].avg / 10000;
+                        key = "\#result" + i;
+                        $(key).html(hours + " hours");
+                    }
+                }
+            }
+        });//ajax
+    });//avgAmountHours
+
     $("#sumAppointment").on("click", function () {
         $("#title").empty();
         $("#result").empty();
