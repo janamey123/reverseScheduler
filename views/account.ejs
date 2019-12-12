@@ -39,6 +39,11 @@
 <button id="avgAmountHours" class="btn btn-outline btn-info">Average amount of hours not available</button>
 <button id="sumAppointment" class="btn btn-outline btn-info">Sum of appointments per user</button>
 
+<button id="totalAmountGroups" class="btn btn-outline btn-info">Total amount of groups</button>
+<button id="userPerGroup" class="btn btn-outline btn-info">Amount of user per group</button>
+<button id="totalAmountUser" class="btn btn-outline btn-info">Total amount of user</button>
+
+
 <br><br>
 <div id="title"></div>
 <br>
@@ -98,7 +103,6 @@
             success: function (result, status) {
                 let time = "";
                 let timeKey = "";
-
 
                 if (result.length == 0) {
                     $("#message").attr("class", "text-danger");
@@ -165,7 +169,6 @@
             success: function (result, status) {
                 let countKey = "";
 
-
                 if (result.length == 0) {
                     $("#message").attr("class", "text-danger");
                     $("#message").html("Sorry, we couldn't get that information.")
@@ -185,6 +188,99 @@
             }
         });//ajax
     });//sumAppointment
+
+    $("#totalAmountGroups").on("click", function () {
+        $("#title").empty();
+        $("#result").empty();
+
+        $.ajax({
+            method: "GET",
+            url: "/totalAmountGroups",
+            dataType: "json",
+            success: function (result, status) {
+                let countKey = "";
+
+                if (result.length == 0) {
+                    $("#message").attr("class", "text-danger");
+                    $("#message").html("Sorry, we couldn't get that information.")
+                    $("#message").show();
+                } else {
+                    for (let i = 0; i < result.length; i++) {
+                        $("#result").append(`<div name="result" id="result${i}">`);
+                    }
+
+                    $("#title").html("Total amount of groups:");
+
+                    for (let i = 0; i < result.length; i++) {
+                        countKey = "\#result" + i;
+                        $(countKey).html(result[i].count + " groups");
+                    }
+                }
+            }
+        });//ajax
+    });//totalAmountGroups
+
+    $("#userPerGroup").on("click", function () {
+        $("#title").empty();
+        $("#result").empty();
+
+        $.ajax({
+            method: "GET",
+            url: "/userPerGroup",
+            dataType: "json",
+            success: function (result, status) {
+                let countKey = "";
+
+                if (result.length == 0) {
+                    $("#message").attr("class", "text-danger");
+                    $("#message").html("Sorry, we couldn't get that information.")
+                    $("#message").show();
+                } else {
+                    for (let i = 0; i < result.length; i++) {
+                        $("#result").append(`<div name="result" id="result${i}">`);
+                    }
+
+                    $("#title").html("Amount of user per group:");
+
+                    for (let i = 0; i < result.length; i++) {
+                        countKey = "\#result" + i;
+                        $(countKey).html(result[i].groupName + ": " + result[i].count + " user");
+                    }
+                }
+            }
+        });//ajax
+    });//userPerGroup
+
+    $("#totalAmountUser").on("click", function () {
+        $("#title").empty();
+        $("#result").empty();
+
+        $.ajax({
+            method: "GET",
+            url: "/totalAmountUser",
+            dataType: "json",
+            success: function (result, status) {
+                let countKey = "";
+
+                if (result.length == 0) {
+                    $("#message").attr("class", "text-danger");
+                    $("#message").html("Sorry, we couldn't get that information.")
+                    $("#message").show();
+                } else {
+                    for (let i = 0; i < result.length; i++) {
+                        $("#result").append(`<div name="result" id="result${i}">`);
+                    }
+
+                    $("#title").html("Total amount of user:");
+
+                    for (let i = 0; i < result.length; i++) {
+                        countKey = "\#result" + i;
+                        $(countKey).html(result[i].count + " user");
+                    }
+                }
+            }
+        });//ajax
+    });//totalAmountUser
 
     var popupWindow = null;
 

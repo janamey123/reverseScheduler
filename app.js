@@ -344,6 +344,21 @@ app.get("/avgAmountHours", async function (req, res) {
     res.send(number);
 });//avgAmountHours
 
+app.get("/totalAmountGroups", async function (req, res) {
+    let number = await getTotalAmountGroups();
+    res.send(number);
+});//totalAmountGroups
+
+app.get("/userPerGroup", async function (req, res) {
+    let number = await getUserPerGroup();
+    res.send(number);
+});//userPerGroup
+
+app.get("/totalAmountUser", async function (req, res) {
+    let number = await getTotalAmountUser();
+    res.send(number);
+});//totalAmountUser
+
 
 //***********//
 // functions //
@@ -965,7 +980,8 @@ function getTotalAmountHoursUser() {
                        FROM \`appointment\` a 
                        JOIN \`schedule\` s ON a.scheduleId = s.scheduleId 
                        JOIN \`user\` u ON s.userId = u.userId
-                       GROUP BY u.username;
+                       GROUP BY u.username
+                       ORDER BY time, u.username;
                        `;
 
             conn.query(sql, function (err, result) {
@@ -989,7 +1005,8 @@ function getSumAppointmentPerUser() {
                        RIGHT OUTER JOIN \`schedule\` r ON a.scheduleId = r.scheduleId 
                        LEFT OUTER JOIN \`schedule\` l ON a.scheduleId = l.scheduleId 
                        JOIN \`user\` u ON l.userId = u.userId
-                       GROUP BY a.scheduleId;
+                       GROUP BY a.scheduleId
+                       ORDER BY count, u.username;
                        `;
 
             conn.query(sql, function (err, result) {
@@ -1025,6 +1042,69 @@ function getAvgAmountHours() {
         });//connect
     });//promise
 }//getAvgAmountHours
+
+function getTotalAmountGroups() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT count(g.groupName) as 'count'
+                       FROM \`group\` g;
+                       `;
+
+            conn.query(sql, function (err, result) {
+                if (err) throw err;
+                conn.end();
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//getTotalAmountGroups
+
+function getUserPerGroup() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT g.groupName, count(m.userId) as 'count'
+                       FROM \`group\` g 
+                       Right OUTER JOIN \`groupmember\` m ON g.groupId = m.groupId
+                       GROUP BY g.groupName
+                       ORDER BY count, g.groupName;
+                       `;
+
+            conn.query(sql, function (err, result) {
+                if (err) throw err;
+                conn.end();
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//getUserPerGroup
+
+function getTotalAmountUser() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT count(u.username) as 'count'
+                       FROM \`user\` u;
+                       `;
+
+            conn.query(sql, function (err, result) {
+                if (err) throw err;
+                conn.end();
+                resolve(result);
+            });
+        });//connect
+    });//promise
+}//getTotalAmountUser
 
 
 //Building connection to database
