@@ -1,4 +1,3 @@
-// Source: look at Sources -> Sticky
 mybutton = document.getElementById("myBtn");
 window.onscroll = function () {
     scrollFunction()

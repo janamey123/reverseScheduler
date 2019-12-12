@@ -7,12 +7,13 @@
 </div>
 
 <br><br>
-<h1>Your Account</h1>
+<h3>Your Account</h3>
 
-<div id="uname"> </div>
+<div id="uname"></div>
+<br>
 <div id="fname"></div>
+<br>
 <div id="lname"></div>
-
 
 <br><br>
 
@@ -20,18 +21,17 @@
     <div class="d-flex flex-column">
         <div class="p-2">
             <img id="pic0" class="rounded" src="">
-            
         </div>
     </div>
 </div>
 
 
-    <p><a id="update" class="btn btn-outline-success" href="/updateAccount"
+<p><a id="update" class="btn btn-outline-success" href="/updateAccount"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Update Account</a></p>
-      
-    <p><a id="delete" class="btn btn-outline-danger" href="/deleteAccount"
+
+<p><a id="delete" class="btn btn-outline-danger" href="/deleteAccount"
       onclick="centeredPopup(this.href,'myWindow','800','450','yes');return false">Delete</a></p>
-      
+
 <br><br>
 <script>
 
@@ -43,19 +43,19 @@
 
     $(document).ready(function () {
         users();
-         function users(){
-              $.ajax({
+
+        function users() {
+            $.ajax({
                 method: "GET",
                 url: "/getUserInfo",
                 dataType: "json",
                 success: function (result, status) {
-                   
-                            $("#uname").html("Username: " + result[0].username);
-                            $("#fname").html("First Name: " + result[0].firstName);
-                            $("#lname").html("Last Name: " + result[0].lastName);
-                        }
-                    });
-         }
+                    $("#uname").html("Username: " + result[0].username);
+                    $("#fname").html("First Name: " + result[0].firstName);
+                    $("#lname").html("Last Name: " + result[0].lastName);
+                }
+            });//ajax
+        }//users
 
         $.ajax({
             method: "GET",
@@ -63,13 +63,12 @@
             dataType: "json",
             data: {"state": $("#state").val()},
             success: function (result, status) {
-                console.log("https://pixabay.com/api/?key=" + API_KEY + "&q=" + "dog" + "&orientation=vertical");
+                //console.log("https://pixabay.com/api/?key=" + API_KEY + "&q=" + "dog" + "&orientation=vertical");
                 $("#pic0").attr("src", result.hits[rand].previewURL);
             }
         });//ajax
     });//ready
-    
-    
+
     var popupWindow = null;
 
     function centeredPopup(url, winName, w, h, scroll) {
@@ -79,7 +78,6 @@
             'height=' + h + ',width=' + w + ',top=' + TopPosition + ',left=' + LeftPosition + ',scrollbars=' + scroll + ',resizable'
         popupWindow = window.open(url, winName, settings)
     }
-    
 </script>
 
 <% include partials/footer %>

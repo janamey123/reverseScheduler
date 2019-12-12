@@ -23,7 +23,6 @@ INSERT INTO `user` (`userId`, `firstName`, `lastName`, `username`, `password`) V
 ;
 
 DROP TABLE IF EXISTS `group`;
-
 CREATE TABLE `group` (
   `groupId` mediumint(9) NOT NULL AUTO_INCREMENT,
   `groupName` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
@@ -56,11 +55,6 @@ CREATE TABLE `schedule` (
   `userId` mediumint(9) NOT NULL,
   PRIMARY KEY (`scheduleId`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-  
-ALTER TABLE `schedule`
-ADD CONSTRAINT `FK_user_schedule`
-FOREIGN KEY (`userId`) REFERENCES `user` (`userId`)
-ON UPDATE CASCADE;
 
 INSERT INTO `schedule` (`userId`) VALUES
 (1),
@@ -79,11 +73,6 @@ CREATE TABLE `appointment` (
   KEY `appointmentId` (`appointmentId`),
   KEY `scheduleId` (`scheduleId`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-  
-ALTER TABLE `appointment`
-ADD CONSTRAINT `FK_schedule`
-FOREIGN KEY (`scheduleId`) REFERENCES `schedule` (`scheduleId`)
-ON UPDATE CASCADE;
 
 INSERT INTO `appointment` (`appointmentId`, `scheduleId`, `description`, `date`, `startTime`, `endTime`) VALUES
 (1,	1, 'appointment1', '2019-12-15', '09:10:00', '11:10:00'),

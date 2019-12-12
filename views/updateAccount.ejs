@@ -17,26 +17,26 @@
 <h4>Update Account</h4>
 <br>
 
- Username: <input type="text" id="username" name="username"><br> <br>
- First Name: <input type="text" id="firstName" name="firstName"><br> <br>
- Last Name: <input type="text" id="lastName" name="lastName"><br> <br>
- Password: <input type="text" id="oldPassword" name="oldPassword"><br> <br>
+Username: <input type="text" id="username" name="username"><br> <br>
+First Name: <input type="text" id="firstName" name="firstName"><br> <br>
+Last Name: <input type="text" id="lastName" name="lastName"><br> <br>
+Password: <input type="text" id="password" name="password"><br> <br>
 
 <br><br>
-<button id="updateAcc" class="btn btn-lg btn-info">Update</button>
+<button id="updateAccBtn" class="btn btn-lg btn-info">Update</button>
 <br><br>
 <div id="updateError"></div>
 <br>
 <script>
-    //user creates a new group
-    $("#updateAcc").on("click", function () {
+    //user updates his account infos
+    $("#updateAccBtn").on("click", function () {
         let username = $("#username").val();
-        let firstname= $("#firstName").val();
+        let firstname = $("#firstName").val();
         let lastname = $("#lastName").val();
-        let old = $("#oldPassword").val();
+        let old = $("#password").val();
 
         $("#updateError").hide();
-        if (username == "" && firstname == "" && lastname== "" && old== "") {
+        if (username == "" && firstname == "" && lastname == "" && old == "") {
             $("#updateError").attr("class", "text-danger");
             $("#updateError").html("Please enter enter all information. ");
             $("#updateError").show();
@@ -48,12 +48,10 @@
             url: "/upUser",
             dataType: "json",
             data: {
-                "username": username, 
+                "username": username,
                 "firstname": firstname,
                 "lastname": lastname,
                 "old": old
-        
-                
             },
             success: function (result, status) {
                 $("#updateError").hide();
@@ -68,7 +66,7 @@
                 }
             }
         });//ajax
-    });//updateBtn
+    });//updateAccBtn
 </script>
 </body>
 </html>

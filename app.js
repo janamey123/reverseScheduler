@@ -13,12 +13,45 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
-// routes
+//********//
+// routes //
+//********//
 
+//****************//
+// sign up/ login //
+//****************//
 app.get("/", async function (req, res) {
     let groups = await getGroups();
     res.render("index", {"groups": groups});
-});
+});//index
+
+app.get("/signUp", function (req, res) {
+    res.render("signUp");
+});//signUp
+
+app.get("/signingUpRequest", async function (req, res) {
+    let user = await getUser(req.query.username);
+    let success = false;
+    try {
+        if (user[0].username == req.query.username) {
+            res.send(success);
+        }
+    } catch (e) {
+        let insert = await insertNewUser(req.query);
+        if (insert.affectedRows == 0) {
+            res.send(success);
+        } else {
+            let schedule = await createNewSchedule(req.query);
+            success = true;
+            res.send(success);
+        }
+    }
+});//signingUpRequest
+
+app.get("/userSearchSection", async function (req, res) {
+    let searchResult = await getSearchResult(req.query);
+    res.send(searchResult);
+});//userSearchSection
 
 app.post("/", async function (req, res) {
     let username = req.body.username;
@@ -26,7 +59,8 @@ app.post("/", async function (req, res) {
     let hashedPwd = "";
     let userMatch = false;
 
-    let result = await checkUsername(username);
+    let result = await getUser(username);
+
 
     if (result.length > 0) {
         hashedPwd = result[0].password;
@@ -44,26 +78,26 @@ app.post("/", async function (req, res) {
         let groups = await getGroups();
         res.send(false);
     }
-});
-
-app.get("/dashboard", isAuthenticated, function (req, res) {
-    res.render("dashboard");
-});
+});//index
 
 app.get("/logout", function (req, res) {
     req.session.destroy();
     res.redirect("/");
-});
+});//logout
 
-app.get("/account", isAuthenticated, function (req, res) {
-    res.render("account");
-});
+//**************//
+// appointments //
+//**************//
+
+app.get("/dashboard", isAuthenticated, function (req, res) {
+    res.render("dashboard");
+});//dashboard
 
 app.get("/addAppointment", isAuthenticated, function (req, res) {
     res.render("addAppointment");
-});
+});//appAppontment
 
-app.get("/addAppointmentRequest", async function (req, res) {
+app.get("/addAppointmentRequest", isAuthenticated, async function (req, res) {
     let scheduleId = await getScheduleId(req.session.username);
     let id = scheduleId[0].scheduleId;
     let success = false;
@@ -75,13 +109,13 @@ app.get("/addAppointmentRequest", async function (req, res) {
         success = true;
         res.send(success);
     }
-});
+});//addAppointmentRequest
 
 app.get("/deleteAppointment", isAuthenticated, function (req, res) {
     res.render("deleteAppointment");
-});
+});//deleteAppointment
 
-app.get("/deleteAppointmentRequest", async function (req, res) {
+app.get("/deleteAppointmentRequest", isAuthenticated, async function (req, res) {
     let scheduleId = await getScheduleId(req.session.username);
     let id = scheduleId[0].scheduleId;
     let success = false;
@@ -97,11 +131,11 @@ app.get("/deleteAppointmentRequest", async function (req, res) {
             res.send(success);
         }
     }
-});
+});//deleteAppointmentRequest
 
 app.get("/editAppointment", isAuthenticated, function (req, res) {
     res.render("editAppointment");
-});
+});//editAppointment
 
 app.get("/getAppointmentRequest", async function (req, res) {
     let scheduleId = await getScheduleId(req.session.username);
@@ -118,7 +152,7 @@ app.get("/getAppointmentRequest", async function (req, res) {
         }
 
     }
-});
+});//getAppointmentRequest
 
 app.get("/changeAppointmentRequest", async function (req, res) {
     let scheduleId = await getScheduleId(req.session.username);
@@ -133,9 +167,8 @@ app.get("/changeAppointmentRequest", async function (req, res) {
         } catch (e) {
             res.send(false);
         }
-
     }
-});
+});//changeAppointmentRequest
 
 app.get("/getUsersEvents", async function (req, res) {
     let username = req.session.username;
@@ -144,23 +177,27 @@ app.get("/getUsersEvents", async function (req, res) {
 
     let events = await getEvents(id);
     res.send(events);
-});
+});//getUsersEvents
+
+//********//
+// groups //
+//********//
 
 app.get("/groups", isAuthenticated, async function (req, res) {
     let groups = await getGroups();
     res.render("groups", {"groups": groups});
-});
+});//groups
 
 app.get("/getUsersGroups", async function (req, res) {
     let username = req.session.username;
     let groups = await getUsersGroups(username);
 
     res.send(groups);
-});
+});//getUsersGroups
 
 app.get("/addGroup", isAuthenticated, function (req, res) {
     res.render("addGroup");
-});
+});//addGroup
 
 app.get("/addGroupRequest", async function (req, res) {
     let group = await getSingleGroup(req.query);
@@ -185,12 +222,12 @@ app.get("/addGroupRequest", async function (req, res) {
             res.send(success);
         }
     }
-});
+});//addGroupRequest
 
 app.get("/addMemberToGroup", isAuthenticated, async function (req, res) {
     let groups = await getGroups();
     res.render("addMemberToGroup", {"groups": groups});
-});
+});//addMemberToGroup
 
 app.get("/addNewMemberRequest", async function (req, res) {
     let user = await getUser(req.query.member);
@@ -204,20 +241,24 @@ app.get("/addNewMemberRequest", async function (req, res) {
         res.send(success);
         return;
     }
-
-    let addUser = await addGroupMember(group[0].groupId, userId);
-    if (addUser.affectedRows == 0) {
-        res.send(success);
-    } else {
-        success = true;
+    try {
+        let addUser = await addGroupMember(group[0].groupId, userId);
+        if (addUser.affectedRows == 0) {
+            res.send(success);
+        } else {
+            success = true;
+            res.send(success);
+        }
+    } catch (e) {
         res.send(success);
     }
-});
+
+});//addNewMemberRequest
 
 app.get("/deleteGroup", isAuthenticated, async function (req, res) {
     let groups = await getGroups();
     res.render("deleteGroup", {"groups": groups});
-});
+});//deleteGroup
 
 app.get("/deleteGroupRequest", async function (req, res) {
     let group = await getSingleGroup(req.query);
@@ -237,76 +278,66 @@ app.get("/deleteGroupRequest", async function (req, res) {
     } catch (e) {
         res.send(success);
     }
-});
+});//deleteGroupRequest
 
 app.get("/getAvailability", async function (req, res) {
     let available = await getAvailabilityOfGroup(req.query);
     res.send(available);
-});
+});//getAvailability
 
-app.get("/signUp", function (req, res) {
-    res.render("signUp");
-});
+//*********//
+// account //
+//*********//
 
-app.get("/signingUpRequest", async function (req, res) {
-    let user = await getUser(req.query.username);
-    let success = false;
-    try {
-        if (user[0].username == req.query.username) {
-            res.send(success);
-        }
-    } catch (e) {
-        let insert = await insertNewUser(req.query);
-        if (insert.affectedRows == 0) {
-            res.send(success);
-        } else {
-            let schedule = await createNewSchedule(req.query);
-            success = true;
-            res.send(success);
-        }
-    }
-});
+app.get("/account", isAuthenticated, function (req, res) {
+    res.render("account");
+});//account
 
-app.get("/userSearchSection", async function (req, res) {
-    let searchResult = await getSearchResult(req.query);
-    res.send(searchResult);
-});
-app.get("/getUserInfo", async function(req, res){
-    let user= await getUser(req.session.username);
+app.get("/getUserInfo", async function (req, res) {
+    let user = await getUser(req.session.username);
     res.send(user);
-});
-app.get("/updateAccount", async function(req, res){
+});//getUserInfo
+
+app.get("/updateAccount", async function (req, res) {
     res.render("updateAccount");
-});
-app.get("/deleteAccount", async function(req, res){
+});//updateAccount
+
+app.get("/upUser", async function (req, res) {
+    try {
+        let user = await updateUser(req.query, req.session.username);
+        req.session.username = req.query.username;
+        res.send(true);
+    } catch (e) {
+        res.send(false);
+    }
+});//upUser
+
+app.get("/deleteAccount", async function (req, res) {
     res.render("deleteAccount");
-});
-app.get("/upUser", async function(req, res){
-    try{
-       let user=await updateUser(req.query, req.session.username);
-      res.send(true); 
-    }catch(e){
+});//deleteAccount
+
+app.get("/deleteUser", async function (req, res) {
+    try {
+        let userId = await getUser(req.session.username);
+        let scheduleId = await getScheduleId(req.session.username);
+        let user = await deleteUser(req.session.username);
+        let schedule = await deleteS(userId[0].userId);
+        let groupmember = await deleteG(userId[0].userId);
+        let appointment = await deleteA(scheduleId[0].scheduleId);
+        res.send(true);
+    } catch (e) {
         res.send(false);
     }
-    
-});
-app.get("/deleteUser", async function(req, res){
-    try{
-        let userId=await getUser(req.session.username);
-        let scheduleId=await getScheduleId(req.session.username);
-       let user=await deleteUser(req.session.username);
-       let schedule=await deleteS(userId[0].userId);
-       let groupmember=await deleteG(userId[0].userId);
-       let appointment=await deleteA(scheduleId[0].scheduleId);
-      res.send(true); 
-    }catch(e){
-        res.send(false);
-    }
-    
-});
+});//deleteAccount
 
 
-// functions
+//***********//
+// functions //
+//***********//
+
+//******//
+// user //
+//******//
 
 function getUser(username) {
     // connect to database here to check if user already exists
@@ -355,6 +386,72 @@ function insertNewUser(query) {
         });//connect
     });//promise
 }//insertNewUser
+
+function getSearchResult(query) {
+    let searchName = query.searchName;
+    let searchUsername = query.searchUsername;
+    let searchGroup = query.searchGroup;
+    let sortBy = query.sortBy;
+
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let params = [];
+            let sql = `SELECT u.firstName, u. username, g.groupName
+                       FROM \`user\` u 
+                       JOIN \`groupmember\` m ON u.userId = m.userId 
+                       JOIN \`group\` g ON m.groupId = g.groupId
+                       `;
+
+            if (searchName) {
+                sql += " AND u.firstName = ?";
+                params.push(searchName);
+            }
+            if (searchUsername) {
+                sql += " AND u.username = ?";
+                params.push(searchUsername);
+            }
+            if (searchGroup && searchGroup != "Select one") {
+                sql += " AND g.groupName = ?";
+                params.push(searchGroup);
+            }
+            if (sortBy) {
+                sql += " ORDER BY " + sortBy;
+            }
+
+            sql += ";";
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getSearchResult
+
+function checkPassword(password, hashedValue) {
+    return new Promise(function (resolve, reject) {
+        bcrypt.compare(password, hashedValue, function (err, result) {
+            resolve(result);
+        });//compare
+    });//promise
+}//checkPassword
+
+function isAuthenticated(req, res, next) {
+    if (!req.session.authenticated) {
+        res.redirect("/");
+    } else {
+        next();
+    }
+}//isAuthenticated
+
+//**************//
+// appointments //
+//*************//
 
 async function createNewSchedule(query) {
     let user = await getUser(query.username);
@@ -431,6 +528,83 @@ function deleteAppointment(body, scheduleId) {
     });//promise
 }//deleteAppointment
 
+function getEvents(scheduleId) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let sql = `SELECT *
+                       FROM \`appointment\` a
+                       WHERE a.scheduleId = ?
+                       ORDER BY a.date, a.startTime;
+                       `;
+
+            conn.query(sql, [scheduleId], function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getEvents
+
+function getAppointment(query, id) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let startTime = query.startTime + ":00";
+            let endTime = query.endTime + ":00";
+            let params = [id, query.description, query.date, startTime, endTime];
+
+            let sql = `SELECT *
+                       FROM \`appointment\` a
+                       WHERE a.scheduleId = ? 
+                       AND description = ? 
+                       AND date = ? 
+                       AND startTime = ? 
+                       AND endTime = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getAppointment
+
+function changeAppointment(query, id) {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+
+            let startTime = query.startTime + ":00";
+            let endTime = query.endTime + ":00";
+            let params = [query.description, query.date, startTime, endTime, id, query.appointmentId];
+
+            let sql = `UPDATE \`appointment\` a 
+                       SET a.description = ?, a.date = ?, a.startTime = ?, a.endTime =  ? 
+                       WHERE a.scheduleId = ? 
+                       AND a.appointmentId = ?;
+                       `;
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//changeAppointment
+
 function getScheduleId(username) {
     let conn = dbConnection();
 
@@ -452,6 +626,10 @@ function getScheduleId(username) {
         });//connect
     });//promise
 }//getScheduleId
+
+//********//
+// groups //
+//********//
 
 function getGroups() {
     let conn = dbConnection();
@@ -603,7 +781,7 @@ function insertNewGroup(query) {
             });
         });//connect
     });//promise
-}//insertNewUser
+}//insertNewGroup
 
 function getAvailabilityOfGroup(query) {
     let groupname = query.groupName;
@@ -634,169 +812,14 @@ function getAvailabilityOfGroup(query) {
     });//promise
 }//getAvailabilityOfGroup
 
-function getSearchResult(query) {
-    let searchName = query.searchName;
-    let searchUsername = query.searchUsername;
-    let searchGroup = query.searchGroup;
-    let sortBy = query.sortBy;
-
-    let conn = dbConnection();
-
-    return new Promise(function (resolve, reject) {
-        conn.connect(function (err) {
-            if (err) throw err;
-
-            let params = [];
-            let sql = `SELECT u.firstName, u. username, g.groupName
-                       FROM \`user\` u 
-                       JOIN \`groupmember\` m ON u.userId = m.userId 
-                       JOIN \`group\` g ON m.groupId = g.groupId
-                       `;
-
-            if (searchName) {
-                sql += " AND u.firstName = ?";
-                params.push(searchName);
-            }
-            if (searchUsername) {
-                sql += " AND u.username = ?";
-                params.push(searchUsername);
-            }
-            if (searchGroup && searchGroup != "Select one") {
-                sql += " AND g.groupName = ?";
-                params.push(searchGroup);
-            }
-            if (sortBy) {
-                sql += " ORDER BY " + sortBy;
-            }
-
-            sql += ";";
-
-            conn.query(sql, params, function (err, rows, fields) {
-                if (err) throw err;
-                conn.end();
-                resolve(rows);
-            });
-        });//connect
-    });//promise
-}//getSearchResult
-
-function checkPassword(password, hashedValue) {
-    return new Promise(function (resolve, reject) {
-        bcrypt.compare(password, hashedValue, function (err, result) {
-            resolve(result);
-        });//compare
-    });//promise
-}//checkPassword
-
-/**
- * Checks whether the username exists in database.
- * if found, returns corresponding record.
- * @param {string} username
- * @return {array of objects}
- */
-function checkUsername(username) {
-    let sql = "SELECT * FROM user WHERE username = ?";
-    return new Promise(function (resolve, reject) {
-        let conn = dbConnection();
-        conn.connect(function (err) {
-            if (err) throw err;
-            conn.query(sql, [username], function (err, rows, fields) {
-                if (err) throw err;
-                resolve(rows);
-            });//query
-        });//connect
-    });//promise
-}//checkUsername
-
-function isAuthenticated(req, res, next) {
-    if (!req.session.authenticated) {
-        res.redirect("/");
-    } else {
-        next();
-    }
-}//isAuthenticated
-
-function getEvents(scheduleId) {
-    let conn = dbConnection();
-
-    return new Promise(function (resolve, reject) {
-        conn.connect(function (err) {
-            if (err) throw err;
-
-            let sql = `SELECT *
-                       FROM \`appointment\` a
-                       WHERE a.scheduleId = ?
-                       ORDER BY a.date, a.startTime;
-                       `;
-
-            conn.query(sql, [scheduleId], function (err, rows, fields) {
-                if (err) throw err;
-                conn.end();
-                resolve(rows);
-            });
-        });//connect
-    });//promise
-}//getEvents
-
-function getAppointment(query, id) {
-    let conn = dbConnection();
-
-    return new Promise(function (resolve, reject) {
-        conn.connect(function (err) {
-            if (err) throw err;
-
-            let startTime = query.startTime + ":00";
-            let endTime = query.endTime + ":00";
-            let params = [id, query.description, query.date, startTime, endTime];
-
-            let sql = `SELECT *
-                       FROM \`appointment\` a
-                       WHERE a.scheduleId = ? 
-                       AND description = ? 
-                       AND date = ? 
-                       AND startTime = ? 
-                       AND endTime = ?;
-                       `;
-
-            conn.query(sql, params, function (err, rows, fields) {
-                if (err) throw err;
-                conn.end();
-                resolve(rows);
-            });
-        });//connect
-    });//promise
-}//getAppointment
-
-function changeAppointment(query, id) {
-    let conn = dbConnection();
-
-    return new Promise(function (resolve, reject) {
-        conn.connect(function (err) {
-            if (err) throw err;
-
-            let startTime = query.startTime + ":00";
-            let endTime = query.endTime + ":00";
-            let params = [query.description, query.date, startTime, endTime, id, query.appointmentId];
-
-            let sql = `UPDATE \`appointment\` a 
-                       SET a.description = ?, a.date = ?, a.startTime = ?, a.endTime =  ? 
-                       WHERE a.scheduleId = ? 
-                       AND a.appointmentId = ?;
-                       `;
-
-            conn.query(sql, params, function (err, rows, fields) {
-                if (err) throw err;
-                conn.end();
-                resolve(rows);
-            });
-        });//connect
-    });//promise
-}//changeAppointment
+//*********//
+// account //
+//*********//
 
 function updateUser(query, user) {
-    
-    let password=query.old;
-    var hash=bcrypt.hashSync(password,saltRounds);
+
+    let password = query.old;
+    var hash = bcrypt.hashSync(password, saltRounds);
     let conn = dbConnection();
 
     return new Promise(function (resolve, reject) {
@@ -843,7 +866,7 @@ function deleteUser(user) {
             });
         });//connect
     });//promise
-}//deleUser
+}//deleteUser
 
 
 function deleteS(userId) {
@@ -868,8 +891,7 @@ function deleteS(userId) {
             });
         });//connect
     });//promise
-}//deleUser
-
+}//deleteSchedule
 
 function deleteG(userId) {
     let conn = dbConnection();
@@ -893,8 +915,7 @@ function deleteG(userId) {
             });
         });//connect
     });//promise
-}//deleUser
-
+}//deleteGroupmember
 
 function deleteA(scheduleId) {
     let conn = dbConnection();
@@ -918,9 +939,9 @@ function deleteA(scheduleId) {
             });
         });//connect
     });//promise
-}//deleUser
+}//deleteAppointments
 
-
+//Building connection to database
 function dbConnection() {
     let conn = mysql.createConnection({
         host: "mcldisu5ppkm29wf.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",

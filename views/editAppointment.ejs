@@ -22,12 +22,18 @@ Start time: <input type="time" id="startTime" name="startTime"><br> <br>
 End time: <input type="time" id="endTime" name="endTime"><br> <br>
 Description: <input type="text" id="description" name="description">
 <br><br>
-"First enter information about appointment, then click "get appointment".
-<br>
-Change the information and click "change appointment"."
-<br>
 <button id="getAppointmentBtn" class="btn btn-lg btn-info">Get appointment!</button>
 <button id="changeAppointmentBtn" class="btn btn-lg btn-info">Change appointment!</button>
+<br><br>
+<small>
+    How to change an appointment:
+    <br>
+    Step 1: Enter information about existing appointment and click "Get appointment".
+    <br>
+    Step 2: Wait for approval to edit your appointment.
+    <br>
+    Step 3: Edit the information and click "Change appointment".
+</small>
 <br><br>
 <div id="editAppointmentError"></div>
 <br>
@@ -150,7 +156,6 @@ Change the information and click "change appointment"."
             }
         });//ajax
     });//changeAppointmentBtn
-
 </script>
 </body>
 </html>

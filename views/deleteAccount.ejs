@@ -19,30 +19,30 @@
 Are you sure you want to delete account?
 
 <br><br>
-<button id="delete" class="btn btn-lg btn-danger">Delete</button>
+<button id="deleteAccBtn" class="btn btn-lg btn-danger">Delete account</button>
 <br><br>
-<div id="deleteAcc"></div>
+<div id="deleteAccError"></div>
 <br>
 <script>
-    //user creates a new group
-    $("#delete").on("click", function () {
+    //user deletes its own account
+    $("#deleteAccBtn").on("click", function () {
 
         $.ajax({
             method: "GET",
             url: "/deleteUser",
             dataType: "json",
             success: function (result, status) {
-                $("#deleteAcc").hide();
+                $("#deleteAccError").hide();
                 if (result == false) {
-                    $("#deleteAcc").attr("class", "text-danger");
-                    $("#deleteAcc").html("Sorry, could not update.");
-                    $("#deleteAcc").show();
+                    $("#deleteAccError").attr("class", "text-danger");
+                    $("#deleteAccError").html("Sorry, could not delete account.");
+                    $("#deleteAccError").show();
                 } else {
-                    location.href="/logout";
+                    location.href = "/logout";
                 }
             }
         });//ajax
-    });//updateBtn
+    });//deleteAccBtn
 </script>
 </body>
 </html>
